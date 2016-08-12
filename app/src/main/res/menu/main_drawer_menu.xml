@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/note_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_menu_note"
+            android:icon="@drawable/ic_description_black"
+            android:checked="true"
+            android:title="@string/string_notes"/>
+        <item
+            android:id="@+id/nav_menu_archive"
+            android:icon="@drawable/ic_archive_black"
+            android:title="@string/string_archive"/>
+        <item
+            android:id="@+id/nav_menu_trash"
+            android:icon="@drawable/ic_delete_black"
+            android:title="@string/string_trash"/>
+    </group>
+
+    <group android:id="@+id/settings_group">
+
+        <item
+            android:id="@+id/nav_menu_settings"
+            android:icon="@drawable/ic_settings_black"
+            android:title="@string/string_settings" />
+        <item
+            android:id="@+id/nav_menu_help"
+            android:icon="@drawable/ic_help_black"
+            android:title="@string/string_help_and_feedback" />
+    </group>
+</menu>

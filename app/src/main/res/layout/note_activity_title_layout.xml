@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp">
+
+    <ImageView
+        android:id="@+id/color_indicator"
+        android:layout_width="@dimen/note_list_item_color_indicator_width"
+        android:layout_height="40dp"
+        android:layout_marginLeft="@dimen/note_list_item_horizontal_margin"
+        android:layout_marginStart="@dimen/note_list_item_horizontal_margin"
+        android:layout_marginTop="@dimen/note_list_item_vertical_margin"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:contentDescription="@null" />
+
+    <EditText
+        android:id="@+id/edt_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/color_indicator"
+        android:layout_toRightOf="@id/color_indicator"
+        android:layout_marginEnd="@dimen/note_list_item_horizontal_margin"
+        android:layout_marginRight="@dimen/note_list_item_horizontal_margin"
+        android:layout_marginTop="7dp"
+        android:hint="@string/string_task"
+        android:textColorHint="@color/color_gray"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+</RelativeLayout>

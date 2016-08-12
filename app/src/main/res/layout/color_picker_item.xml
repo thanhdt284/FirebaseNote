@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageButton
+        android:id="@+id/color_item"
+        android:layout_width="@dimen/color_item_size"
+        android:layout_height="@dimen/color_item_size"
+        android:layout_margin="5dp"
+        android:background="@drawable/button_ripple"
+        android:src="@drawable/color_picker_item_background"
+        android:contentDescription="@null" />
+
+    <ImageButton
+        android:id="@+id/selector_item"
+        android:layout_width="@dimen/color_picker_check_size"
+        android:layout_height="@dimen/color_picker_check_size"
+        android:layout_gravity="center"
+        android:layout_margin="5dp"
+        android:scaleType="fitXY"
+        android:background="@drawable/button_ripple"
+        android:contentDescription="@null"
+        android:src="@drawable/check"
+        android:visibility="gone" />
+
+</FrameLayout>

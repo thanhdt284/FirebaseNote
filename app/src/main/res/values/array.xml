@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="color_list">
+        <item>@color/color_gray</item>
+        <item>@color/color_red</item>
+        <item>@color/color_pink</item>
+        <item>@color/color_orange</item>
+        <item>@color/color_yellow</item>
+        <item>@color/color_green</item>
+        <item>@color/color_cyan</item>
+        <item>@color/color_blue</item>
+        <item>@color/color_purple</item>
+    </array>
+
+    <array name="color_50_list">
+        <item>@color/color_gray_50</item>
+        <item>@color/color_red_50</item>
+        <item>@color/color_pink_50</item>
+        <item>@color/color_orange_50</item>
+        <item>@color/color_yellow_50</item>
+        <item>@color/color_green_50</item>
+        <item>@color/color_cyan_50</item>
+        <item>@color/color_blue_50</item>
+        <item>@color/color_purple_50</item>
+    </array>
+
+    <array name="color_100_list">
+        <item>@color/color_gray_100</item>
+        <item>@color/color_red_100</item>
+        <item>@color/color_pink_100</item>
+        <item>@color/color_orange_100</item>
+        <item>@color/color_yellow_100</item>
+        <item>@color/color_green_100</item>
+        <item>@color/color_cyan_100</item>
+        <item>@color/color_blue_100</item>
+        <item>@color/color_purple_100</item>
+    </array>
+</resources>

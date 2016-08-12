@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">Note</string>
+    <string name="string_task">Task</string>
+    <string name="string_add_sub_task">Add sub task</string>
+    <string name="string_color">color</string>
+    <string name="string_archive">Archive</string>
+    <string name="string_settings">Settings</string>
+    <string name="string_help_and_feedback"><![CDATA[Help & Feedback]]></string>
+    <string name="string_open_drawer">Open navigation drawer</string>
+    <string name="string_close_drawer">Close navigation drawer</string>
+    <string name="string_note_is_archived">Note is archived.</string>
+    <string name="string_undo">UNDO</string>
+    <string name="string_search">Search</string>
+    <string name="string_trash">Trash</string>
+    <string name="string_home">home</string>
+    <string name="string_notes">Notes</string>
+    <string name="string_delete">delete</string>
+    <string name="string_unarchive">unarchive</string>
+    <string name="string_restore">restore</string>
+    <string name="string_note_is_deleted">Note is deleted</string>
+    <string name="string_note_is_permanently_deleted">note is permanently deleted</string>
+</resources>

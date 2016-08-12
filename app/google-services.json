@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "269288422426",
+    "firebase_url": "https://fir-note-9fc81.firebaseio.com",
+    "project_id": "fir-note-9fc81",
+    "storage_bucket": "fir-note-9fc81.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269288422426:android:7768ef5e169d1bd1",
+        "android_client_info": {
+          "package_name": "com.stevedao.note"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269288422426-qihi0pjefo8ughntiqrooj7hjg1avok7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.stevedao.note",
+            "certificate_hash": "BB775CAC67A40A4C0DAEF5D7C787B980293E83C4"
+          }
+        },
+        {
+          "client_id": "269288422426-cv97lo8j6qpj2uib8a5c85m2k5uu2ges.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnDyhF5Hy_e54ZGXqTVY1ooShGZn13LWs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269288422426-cv97lo8j6qpj2uib8a5c85m2k5uu2ges.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

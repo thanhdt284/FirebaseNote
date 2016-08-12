@@ -1,0 +1,38 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="paint_size">35dp</dimen>
+    <dimen name="title_text_size">22sp</dimen>
+    <dimen name="handler_size">17dp</dimen>
+    <dimen name="check_box_size">30dp</dimen>
+    <dimen name="note_content_item_height">40dp</dimen>
+    <dimen name="item_handler_margin">5dp</dimen>
+    <dimen name="content_item_margin">8dp</dimen>
+    <dimen name="note_content_item_padding_start">12dp</dimen>
+    <dimen name="content_item_text_size">16sp</dimen>
+    <dimen name="add_sub_task_layout_height">40dp</dimen>
+    <dimen name="item_remove_size">13dp</dimen>
+    <dimen name="item_remove_margin">9dp</dimen>
+    <dimen name="color_item_size">45dp</dimen>
+    <dimen name="popup_window_padding">15dp</dimen>
+    <dimen name="color_picker_check_size">30dp</dimen>
+    <dimen name="color_picker_button_size">35dp</dimen>
+    <dimen name="title_text_margin_left">10dp</dimen>
+    <dimen name="color_picker_window_offset_x">-17dp</dimen>
+    <dimen name="color_picker_window_offset_y">-55dp</dimen>
+    <dimen name="note_list_item_color_indicator_width">40dp</dimen>
+    <dimen name="note_list_item_horizontal_margin">16dp</dimen>
+    <dimen name="note_list_item_height">88dp</dimen>
+    <dimen name="note_list_item_vertical_margin">16dp</dimen>
+    <dimen name="note_list_item_bottom_margin">20dp</dimen>
+    <dimen name="note_list_item_title_text_size">16sp</dimen>
+    <dimen name="note_list_item_margin_right">16dp</dimen>
+    <dimen name="note_list_item_content_text_size">14sp</dimen>
+    <dimen name="note_list_top_padding">8dp</dimen>
+    <dimen name="note_list_divider_height">1dp</dimen>
+    <dimen name="note_actionbar_shadow_height">4dp</dimen>
+
+
+</resources>

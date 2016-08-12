@@ -1,0 +1,9 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Before rotating, immediately set the alpha to 0. -->
+    <objectAnimator
+        android:duration="300"
+        android:fillAfter="true"
+        android:valueFrom="0"
+        android:propertyName="translationY"
+        android:valueTo="2000" />
+</set>
