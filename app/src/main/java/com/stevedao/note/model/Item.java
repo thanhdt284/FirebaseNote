@@ -4,17 +4,22 @@ package com.stevedao.note.model;
  * Created by thanh.dao on 07/04/2016.
  *
  */
-public class Item extends Entity{
-    public static final int defaultValue = -1;
+public class Item extends Entity {
+    public static final String ROOT = "items";
+    public static final String NOTE_ID = "note_id";
+    public static final String CONTENT = "content";
+    public static final String IS_CHECKED = "is_checked";
+    public static final String INDEX = "index";
+
     private int noteId;
     private String content;
-    private boolean checked;
+    private boolean isChecked;
     private int index;
 
     public Item(int noteId, String content, boolean checked, int index) {
         this.noteId = noteId;
         this.content = content;
-        this.checked = checked;
+        this.isChecked = checked;
         this.index = index;
     }
 
@@ -22,7 +27,7 @@ public class Item extends Entity{
         super(id);
         this.noteId = noteId;
         this.content = content;
-        this.checked = checked;
+        this.isChecked = checked;
         this.index = index;
     }
 
@@ -35,11 +40,11 @@ public class Item extends Entity{
     }
 
     public boolean isChecked() {
-        return checked;
+        return isChecked;
     }
 
     public void setChecked(boolean checked) {
-        this.checked = checked;
+        this.isChecked = checked;
     }
 
     public int getNoteId() {

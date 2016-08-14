@@ -7,7 +7,7 @@ import java.util.Date;
  *
  */
 
-public class Note extends Entity {
+public abstract class Note extends Entity {
 
     public static final String ROOT = "notes";
     public static final String TITLE = "title";
@@ -25,7 +25,6 @@ public class Note extends Entity {
     private int storageMode;
     private long lastModified;
     private long deletedTime;
-    private String fullContent;
 
     public Note() {
         this.title = "";
@@ -104,11 +103,4 @@ public class Note extends Entity {
         this.deletedTime = deletedTime;
     }
 
-    public String getFullContent() {
-        return fullContent;
-    }
-
-    public void setFullContent(String fullContent) {
-        this.fullContent = fullContent;
-    }
 }

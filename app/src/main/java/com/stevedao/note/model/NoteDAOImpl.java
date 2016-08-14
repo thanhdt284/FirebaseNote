@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.stevedao.note.control.Common;
@@ -31,22 +32,23 @@ public class NoteDAOImpl implements EntityDAO<Note> {
     @Override
     public String addEntity(Note note) {
         DatabaseReference noteRef = FirebaseUtil.getNoteRef();
-        String noteKey = "";
+        final String[] noteKey = {""};
 
         if (noteRef != null) {
-            noteKey = noteRef.push().getKey();
+            noteKey[0] = noteRef.push().getKey();
 
-            noteRef.child(noteKey).setValue(note, new DatabaseReference.CompletionListener() {
+            noteRef.child(noteKey[0]).setValue(note, new DatabaseReference.CompletionListener() {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                     if (databaseError != null) {
                         Log.e(TAG, "onComplete: Add note Error " + databaseError.getMessage());
+                        noteKey[0] = "";
                     }
                 }
             });
         }
 
-        return noteKey;
+        return noteKey[0];
     }
 
     public int addEntities(ArrayList<Note> entities) {
@@ -56,6 +58,11 @@ public class NoteDAOImpl implements EntityDAO<Note> {
             if (!addEntity(note).equals("")) {
                 count++;
             }
+        }
+
+        if (count != entities.size()){
+            Log.w(TAG, "addEntities: size = " + entities.size() + " - added = " + count);
+            Log.w(TAG, "addEntities: some notes not added !!!");
         }
 
         return count;
@@ -93,11 +100,11 @@ public class NoteDAOImpl implements EntityDAO<Note> {
 
             if (column != null) {
                 switch (column) {
-                case FirebaseUtil.Note.FIELD_COLOR:
-                case FirebaseUtil.Note.FIELD_STORAGE_MODE:
+                case Note.COLOR:
+                case Note.STORAGE_MODE:
                     query = noteRef.orderByChild(column).equalTo((Integer) value);
                     break;
-                case FirebaseUtil.Note.FIELD_IS_DONE:
+                case Note.IS_DONE:
                     query = noteRef.orderByChild(column).equalTo((Boolean) value);
                     break;
                 default:
@@ -116,7 +123,7 @@ public class NoteDAOImpl implements EntityDAO<Note> {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG, "onCancelled: getAllEntities query error : " + databaseError.getMessage());
+                        Log.e(TAG, "onCancelled: getAllEntities (note) error : " + databaseError.getMessage());
                     }
                 });
             } else {
@@ -141,7 +148,11 @@ public class NoteDAOImpl implements EntityDAO<Note> {
 
     @Override
     public void updateEntity(Note note) {
+        DatabaseReference noteRef = FirebaseUtil.getNoteRef();
 
+        if (noteRef != null) {
+            noteRef.
+        }
     }
 
     @Override
