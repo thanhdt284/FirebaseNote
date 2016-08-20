@@ -159,6 +159,7 @@ public class NoteListFragment extends Fragment {
         getData(mCurrentMode);
     }
 
+    @SuppressWarnings("unchecked")
     private ITaskResponse fbNoteInterface = new ITaskResponse() {
         @Override
         public void onResponse(Object... params) {
@@ -179,6 +180,7 @@ public class NoteListFragment extends Fragment {
         }
     };
 
+    @SuppressWarnings("unchecked")
     private ITaskResponse fbItemInterface = new ITaskResponse() {
         @Override
         public void onResponse(Object... params) {
@@ -448,9 +450,6 @@ public class NoteListFragment extends Fragment {
     }
 
     private void downloadServerData() {
-        ArrayList<Note> serverNotes = mNoteDAO.getAllLocalNotes();
-        ArrayList<Item> serverItems = mItemDAO.getAllLocalItems();
-
         mNoteDAO.getAllServerNotes();
         mItemDAO.getAllServerItems();
     }

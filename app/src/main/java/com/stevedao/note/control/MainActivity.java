@@ -23,7 +23,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -177,11 +176,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onActivityResult: Google sign in failed");
             }
-        } else {
-            if (mLoginFragment != null) {
-                mLoginFragment.activeActivityResult(requestCode, resultCode, data);
-            }
         }
+//        else { // for fb sign in
+//            if (mLoginFragment != null) {
+//                mLoginFragment.activeActivityResult(requestCode, resultCode, data);
+//            }
+//        }
     }
 
     private void logInCompleted() {
@@ -237,10 +237,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivityForResult(loginIntent, RC_SIGN_IN);
         }
 
-        @Override
-        public void fbSignIn(AccessToken token) {
-
-        }
+//        @Override
+//        public void fbSignIn(AccessToken token) {
+//
+//        }
     };
 
     private NoteInterface mNoteInterface = new NoteInterface() {

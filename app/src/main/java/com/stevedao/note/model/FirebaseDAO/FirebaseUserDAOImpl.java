@@ -1,8 +1,7 @@
 package com.stevedao.note.model.FirebaseDAO;
 
-import java.util.ArrayList;
 import android.util.Log;
-import com.google.firebase.auth.FirebaseUser;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -10,6 +9,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.stevedao.note.model.EntityDAO;
 import com.stevedao.note.model.FirebaseUtil;
 import com.stevedao.note.model.User;
+
+import java.util.ArrayList;
 
 /**
  * Created by sev_user on 8/8/2016.
@@ -24,7 +25,6 @@ public class FirebaseUserDAOImpl implements EntityDAO<User> {
     @Override
     public Object addEntity(User user) {
         DatabaseReference userRef = FirebaseUtil.getUserRef();
-        FirebaseUser mCurrentUser = FirebaseUtil.getCurrentUser();
 
         if (userRef != null) {
             userRef.updateChildren(user.toMap(), new DatabaseReference.CompletionListener() {
@@ -98,13 +98,5 @@ public class FirebaseUserDAOImpl implements EntityDAO<User> {
         if (userRef != null) {
             userRef.removeValue();
         }
-    }
-
-    public void addCurrentUser() {
-        FirebaseUser mCurrentUser = FirebaseUtil.getCurrentUser();
-
-        User user = new User(mCurrentUser.getEmail(), mCurrentUser.getDisplayName(),
-                             mCurrentUser.getPhotoUrl() == null ? "" : mCurrentUser.getPhotoUrl().toString());
-        addEntity(user);
     }
 }

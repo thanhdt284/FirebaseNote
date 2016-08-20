@@ -1,11 +1,11 @@
 package com.stevedao.note.model;
 
 import android.support.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 
 /**
  * Created by thanh.dao on 8/4/2016.
@@ -80,6 +80,7 @@ public class FirebaseUtil {
     ////////////////////////
 
     //// Keep sync data /////
+    @SuppressWarnings("unused")
     private static void enableSync() {
         DatabaseReference userRef = getUserRef();
 
@@ -100,8 +101,4 @@ public class FirebaseUtil {
         }
     }
     ////////////////////////
-
-    public static Object getCurrentTime() {
-        return ServerValue.TIMESTAMP;
-    }
 }

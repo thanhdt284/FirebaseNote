@@ -8,6 +8,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.stevedao.note.control.Common;
 import com.stevedao.note.model.DatabaseSpec;
 import com.stevedao.note.model.EntityDAO;
 import com.stevedao.note.model.FirebaseUtil;
@@ -83,7 +84,7 @@ public class FirebaseItemDAOImpl implements EntityDAO<Item> {
     }
 
     @Override
-    public ArrayList<Item> getAllEntities(String column, Object value) {
+    public ArrayList<Item> getAllEntities(String column, final Object value) {
         final ArrayList<Item> itemList = new ArrayList<>();
 
         if (itemRef != null) {
@@ -117,6 +118,14 @@ public class FirebaseItemDAOImpl implements EntityDAO<Item> {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             itemList.add(snapshot.getValue(Item.class));
+                        }
+
+                        if (value instanceof Integer) {
+                            int tag = (int) value;
+
+                            if (tag == 0) {
+                                mInterface.onResponse(Common.LOGIN_ITEM_SYNC, itemList);
+                            }
                         }
                     }
 

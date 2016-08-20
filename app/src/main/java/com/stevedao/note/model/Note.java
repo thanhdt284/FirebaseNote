@@ -1,11 +1,11 @@
 package com.stevedao.note.model;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Created by thanh.dao on 07/04/2016.
+ *
  */
 
 public class Note extends Entity {
@@ -17,8 +17,7 @@ public class Note extends Entity {
     private long deletedTime;
     private String fullContent;
 
-    public Note() {
-    }
+    public Note() { }
 
     @SuppressWarnings("unused")
     public Note(String title, int color, boolean isDone, int storageMode, long lastModified, long deletedTime) {

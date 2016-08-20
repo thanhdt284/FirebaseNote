@@ -17,6 +17,7 @@ import com.stevedao.note.view.ITaskResponse;
 
 /**
  * Created by sev_user on 8/17/2016.
+ *
  */
 public class FirebaseNoteDAOImpl implements EntityDAO<Note> {
 

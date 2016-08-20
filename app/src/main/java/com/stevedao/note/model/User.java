@@ -19,7 +19,6 @@ public class User extends Entity{
     private String photoUrl;
 
     public User() {
-
     }
 
     public User(String email, String displayName, String photoUrl) {

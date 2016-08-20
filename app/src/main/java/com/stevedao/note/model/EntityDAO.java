@@ -1,7 +1,6 @@
 package com.stevedao.note.model;
 
 import java.util.ArrayList;
-import com.stevedao.note.model.Entity;
 
 /**
  * Created by thanh.dao on 07/04/2016.

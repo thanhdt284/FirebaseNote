@@ -1,6 +1,5 @@
 package com.stevedao.note.control;
 
-import android.content.Context;
 import android.content.Intent;
 import android.firebase.note.R;
 import android.os.Bundle;
@@ -9,8 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
+
 import com.google.android.gms.common.SignInButton;
 
 /**
@@ -21,7 +19,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
 //    private static final int RC_SIGN_IN = 103;
     private LoginFragmentInterface mInterface;
-    private CallbackManager mCallbackManager;
+//    private CallbackManager mCallbackManager;
 //    private LoginButton fbLoginButton;
 
     @Override
@@ -37,7 +35,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         ggLoginButton.setOnClickListener(this);
 
-        mCallbackManager = CallbackManager.Factory.create();
+//        mCallbackManager = CallbackManager.Factory.create();
 //        fbLoginButton = (LoginButton) loginView.findViewById(R.id.facebook_signin_button);
 //        fbLoginButton.setReadPermissions("email", "public_profile");
 //        fbLoginButton.setFragment(this);
@@ -73,9 +71,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void activeActivityResult(int requestCode, int resultCode, Intent data) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-    }
+//    public void activeActivityResult(int requestCode, int resultCode, Intent data) {
+//        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+//    }
 
     public void setInterface(LoginFragmentInterface anInterface) {
         this.mInterface = anInterface;
@@ -85,6 +83,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         void ggSignIn();
 
-        void fbSignIn(AccessToken token);
+//        void fbSignIn(AccessToken token);
     }
 }

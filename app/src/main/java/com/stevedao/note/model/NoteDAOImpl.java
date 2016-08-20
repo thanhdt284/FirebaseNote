@@ -7,11 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.ArrayList;
 import com.stevedao.note.control.Common;
 import com.stevedao.note.model.FirebaseDAO.FirebaseNoteDAOImpl;
-import com.stevedao.note.model.FirebaseDAO.FirebaseUserDAOImpl;
 import com.stevedao.note.view.ITaskResponse;
+
+import java.util.ArrayList;
 
 /**
  * Created by thanh.dao on 07/04/2016.

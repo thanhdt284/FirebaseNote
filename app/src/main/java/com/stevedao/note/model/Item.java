@@ -14,6 +14,9 @@ public class Item extends Entity{
     private boolean checked;
     private int index;
 
+    @SuppressWarnings("unused")
+    public Item() { } // use for firebase mapping
+
     public Item(int noteId, String content, boolean checked, int index) {
         this.noteId = noteId;
         this.content = content;
