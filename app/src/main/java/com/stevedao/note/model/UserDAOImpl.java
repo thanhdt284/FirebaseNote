@@ -1,104 +1,127 @@
 package com.stevedao.note.model;
 
 import java.util.ArrayList;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.widget.Toast;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
+import com.stevedao.note.model.FirebaseDAO.FirebaseUserDAOImpl;
 
 /**
- * Created by sev_user on 8/8/2016.
+ * Created by sev_user on 8/17/2016.
  *
  */
-public class UserDAOImpl implements EntityDAO<User>{
+public class UserDAOImpl implements EntityDAO<User> {
     private static final String TAG = "UserDAOImpl";
-    private Context mContext;
+    private final DatabaseOpenHelper dbHelper;
+    private FirebaseUserDAOImpl fbUserImpl;
 
-    public UserDAOImpl(Context context) {
-        this.mContext = context;
+    public UserDAOImpl(Context mContext) {
+        dbHelper = DatabaseOpenHelper.getInstance(mContext);
+        fbUserImpl = new FirebaseUserDAOImpl();
     }
 
     @Override
-    public String addEntity(User user) {
-        DatabaseReference userRef = FirebaseUtil.getUserRef();
-        FirebaseUser mCurrentUser = FirebaseUtil.getCurrentUser();
+    public Object addEntity(User user) {
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        if (userRef != null) {
-            userRef.setValue(user, new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError != null) {
-                        Log.e(TAG, "onComplete: addEntity Error " + databaseError.getMessage());
-                        Toast.makeText(mContext, "Adding user failed.", Toast.LENGTH_SHORT).show();
-                    }
+            ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.UserDB.FIELD_PKEY, (String) user.getId());
+            values.put(DatabaseSpec.UserDB.FIELD_DISPLAY_NAME, user.getDisplayName());
+            values.put(DatabaseSpec.UserDB.FIELD_EMAIL, user.getEmail());
+            values.put(DatabaseSpec.UserDB.FIELD_PHOTO_URL, user.getPhotoUrl());
+
+            if (db.insert(DatabaseSpec.UserDB.TABLE_NAME, null, values) >= 0) {
+                if (FirebaseUtil.getCurrentUser() != null) {
+                    fbUserImpl.addEntity(user);
                 }
-            });
+            } else {
+                Log.e(TAG, "addEntity: Add new user error");
+            }
+
+            return 0;
         }
-
-        return FirebaseUtil.getCurrentUserId();
     }
 
     @Override
-    public User getEntity(String key) { // id is useless when using firebase
-        final User[] mUser = new User[1];
-        DatabaseReference userRef = FirebaseUtil.getUserRef();
-        if (userRef != null) {
-            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    mUser[0] = dataSnapshot.getValue(User.class);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.w(TAG, "onCancelled: get user Error " + databaseError.getMessage());
-                }
-            });
+    public int addEntities(ArrayList<User> entities) {
+        synchronized (dbHelper) {
+            for (User user : entities) {
+                addEntity(user);
+            }
         }
-
-        return mUser[0];
+        return 0;
     }
 
     @Override
-    public ArrayList<User> getAllEntities(String column, int value) {
-        ArrayList<User> mList = new ArrayList<>();
-        mList.add(getEntity(""));
+    public User getEntity(Object id) {
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            User user = null;
 
-        return mList;
+            String[] projection = {
+                    DatabaseSpec.UserDB.FIELD_PKEY,
+                    DatabaseSpec.UserDB.FIELD_DISPLAY_NAME,
+                    DatabaseSpec.UserDB.FIELD_EMAIL,
+                    DatabaseSpec.UserDB.FIELD_PHOTO_URL
+            };
+            String selection = DatabaseSpec.UserDB.FIELD_PKEY + " = ?";
+            String[] selctionArgs = {String.valueOf(id)};
+
+            Cursor cursor =
+                    db.query(DatabaseSpec.UserDB.TABLE_NAME, projection, selection, selctionArgs, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                user = new User(cursor.getString(cursor.getColumnIndex(DatabaseSpec.UserDB.FIELD_PKEY)),
+                                cursor.getString(cursor.getColumnIndex(DatabaseSpec.UserDB.FIELD_DISPLAY_NAME)),
+                                cursor.getString(cursor.getColumnIndex(DatabaseSpec.UserDB.FIELD_EMAIL)),
+                                cursor.getString(cursor.getColumnIndex(DatabaseSpec.UserDB.FIELD_PHOTO_URL)));
+                cursor.close();
+            }
+
+            return user;
+        }
+    }
+
+    @Override
+    public ArrayList<User> getAllEntities(String column, Object value) {
+        synchronized (dbHelper) {
+            ArrayList<User> userList = new ArrayList<>();
+
+            userList.add(getEntity(value));
+
+            return userList;
+        }
     }
 
     @Override
     public void updateEntity(User user) {
-        DatabaseReference userRef = FirebaseUtil.getUserRef();
-        if (userRef != null) {
-            userRef.setValue(user, new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError != null) {
-                        Log.e(TAG, "onComplete: Update user error: " + databaseError.getMessage());
-                    }
-                }
-            });
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.UserDB.FIELD_DISPLAY_NAME, user.getDisplayName());
+            values.put(DatabaseSpec.UserDB.FIELD_EMAIL, user.getEmail());
+            values.put(DatabaseSpec.UserDB.FIELD_PHOTO_URL, user.getPhotoUrl());
+
+            String whereClause = DatabaseSpec.UserDB.FIELD_PKEY + " = ?";
+
+            String[] whereArgs = {String.valueOf(user.getId())};
+            db.update(DatabaseSpec.UserDB.TABLE_NAME, values, whereClause, whereArgs);
         }
     }
 
     @Override
     public void deleteEntity(User user) {
-        DatabaseReference userRef = FirebaseUtil.getUserRef();
-        if (userRef != null) {
-            userRef.removeValue();
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            String whereClause = DatabaseSpec.UserDB.FIELD_PKEY + " = ?";
+            String[] whereArgs = {String.valueOf(user.getId())};
+
+            db.delete(DatabaseSpec.UserDB.TABLE_NAME, whereClause, whereArgs);
         }
-    }
-
-    public void addCurrentUser() {
-        FirebaseUser mCurrentUser = FirebaseUtil.getCurrentUser();
-
-        User user = new User(mCurrentUser.getEmail(), mCurrentUser.getDisplayName(),
-                             mCurrentUser.getPhotoUrl() == null ? "" : mCurrentUser.getPhotoUrl().toString());
-        addEntity(user);
     }
 }

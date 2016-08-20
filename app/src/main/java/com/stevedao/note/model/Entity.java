@@ -5,20 +5,20 @@ package com.stevedao.note.model;
  *
  */
 public abstract class Entity {
-    private int id;
+    protected Object id;
 
     public Entity() {
         id = -1;
     }
-    public Entity(int id) {
+    public Entity(Object id) {
         this.id = id;
     }
 
-    public int getId() {
+    public Object getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Object id) {
         this.id = id;
     }
 }

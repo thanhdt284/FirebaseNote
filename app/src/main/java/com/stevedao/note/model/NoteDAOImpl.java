@@ -4,154 +4,203 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.stevedao.note.control.Common;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.ArrayList;
+import com.stevedao.note.control.Common;
+import com.stevedao.note.model.FirebaseDAO.FirebaseNoteDAOImpl;
+import com.stevedao.note.model.FirebaseDAO.FirebaseUserDAOImpl;
+import com.stevedao.note.view.ITaskResponse;
 
 /**
  * Created by thanh.dao on 07/04/2016.
  *
  */
 public class NoteDAOImpl implements EntityDAO<Note> {
+    private static final String TAG = "NoteDAOImpl";
+    private final DatabaseOpenHelper dbHelper;
+    private FirebaseNoteDAOImpl fbNoteDAOImpl;
 
-    private static final String TAG = "MpteDAOImpl";
-    private Context mContext;
+    private static NoteDAOImpl noteDAO;
 
-    public NoteDAOImpl(Context context) {
-        this.mContext = context;
+    public static synchronized NoteDAOImpl getInstance(Context context) {
+        if (noteDAO == null) {
+            noteDAO = new NoteDAOImpl(context);
+        }
+
+        return noteDAO;
+    }
+
+    private NoteDAOImpl(Context context) {
+        dbHelper = DatabaseOpenHelper.getInstance(context);
+        fbNoteDAOImpl = new FirebaseNoteDAOImpl();
+    }
+
+    public void setFirebaseInterface(ITaskResponse iInterface) {
+        fbNoteDAOImpl.setInterface(iInterface);
     }
 
     @Override
-    public String addEntity(Note note) {
-        DatabaseReference noteRef = FirebaseUtil.getNoteRef();
-        final String[] noteKey = {""};
+    public Object addEntity(Note note) {
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        if (noteRef != null) {
-            noteKey[0] = noteRef.push().getKey();
+            ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.NoteDB.FIELD_TITLE, note.getTitle());
+            values.put(DatabaseSpec.NoteDB.FIELD_COLOR, note.getColor());
+            values.put(DatabaseSpec.NoteDB.FIELD_IS_DONE, note.isDone() ? 1 : 0);
+            values.put(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE, note.getStorageMode());
+            values.put(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED, note.getLastModified());
+            values.put(DatabaseSpec.NoteDB.FIELD_DELETED_TIME, note.getDeletedTime());
 
-            noteRef.child(noteKey[0]).setValue(note, new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError != null) {
-                        Log.e(TAG, "onComplete: Add note Error " + databaseError.getMessage());
-                        noteKey[0] = "";
-                    }
+            int insertedId = (int) db.insert(DatabaseSpec.NoteDB.TABLE_NAME, null, values);
+            if (insertedId == -1) {
+                Log.e(TAG, "addEntity: Add note error: insertedId = -1");
+            } else {
+                note.setId(insertedId);
+
+                if (FirebaseUtil.getCurrentUser() != null) {
+                    fbNoteDAOImpl.addEntity(note);
                 }
-            });
-        }
-
-        return noteKey[0];
-    }
-
-    public int addEntities(ArrayList<Note> entities) {
-        int count = 0;
-
-        for (Note note : entities) {
-            if (!addEntity(note).equals("")) {
-                count++;
             }
+            return insertedId;
         }
-
-        if (count != entities.size()){
-            Log.w(TAG, "addEntities: size = " + entities.size() + " - added = " + count);
-            Log.w(TAG, "addEntities: some notes not added !!!");
-        }
-
-        return count;
     }
 
     @Override
-    public Note getEntity(String key) {
-        DatabaseReference noteRef = FirebaseUtil.getNoteRef();
-        final Note[] note = { null };
+    public int addEntities(ArrayList<Note> entities) {
+        synchronized (dbHelper) {
+            int count = 0;
 
-        if (noteRef != null) {
-            noteRef.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    note[0] = dataSnapshot.getValue(Note.class);
+            for (Note note : entities) {
+                if (((Integer)addEntity(note)) >= 0) {
+                    count++;
                 }
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, "onCancelled: get note error: " + databaseError.getMessage());
-                }
-            });
+            if (FirebaseUtil.getCurrentUser() != null) {
+                fbNoteDAOImpl.addEntities(entities);
+            }
+
+            return count;
         }
+    }
 
-        return note[0];
+    @Override
+    public Note getEntity(Object id) {
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            Note note = null;
+
+            String[] projection = {
+                    DatabaseSpec.NoteDB.FIELD_PKEY,
+                    DatabaseSpec.NoteDB.FIELD_TITLE,
+                    DatabaseSpec.NoteDB.FIELD_COLOR,
+                    DatabaseSpec.NoteDB.FIELD_IS_DONE,
+                    DatabaseSpec.NoteDB.FIELD_STORAGE_MODE,
+                    DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED,
+                    DatabaseSpec.NoteDB.FIELD_DELETED_TIME
+            };
+            String selection = DatabaseSpec.NoteDB.FIELD_PKEY + " = ?";
+            String[] selectionArgs = {
+                    String.valueOf(id)
+            };
+
+            Cursor cursor = db.query(DatabaseSpec.NoteDB.TABLE_NAME, projection, selection, selectionArgs, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                note = new Note(cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_PKEY)),
+                        cursor.getString(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_TITLE)),
+                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_COLOR)),
+                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_IS_DONE)) > 0,
+                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE)),
+                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED)),
+                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_DELETED_TIME)));
+
+                cursor.close();
+            }
+            return note;
+        }
     }
 
     @Override
     public ArrayList<Note> getAllEntities(@Nullable String column, Object value) {
-        final ArrayList<Note> noteList = new ArrayList<>();
-        DatabaseReference noteRef = FirebaseUtil.getNoteRef();
+        synchronized (dbHelper) {
+            ArrayList<Note> list = new ArrayList<>();
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        if (noteRef != null) {
-            Query query = null;
+            String[] projection = {
+                    DatabaseSpec.NoteDB.FIELD_PKEY,
+                    DatabaseSpec.NoteDB.FIELD_TITLE,
+                    DatabaseSpec.NoteDB.FIELD_COLOR,
+                    DatabaseSpec.NoteDB.FIELD_IS_DONE,
+                    DatabaseSpec.NoteDB.FIELD_STORAGE_MODE,
+                    DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED,
+                    DatabaseSpec.NoteDB.FIELD_DELETED_TIME
+            };
+
+            String selection = null;
+            String[] selectionArgs = null;
+            String orderBy = DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED + " DESC";
 
             if (column != null) {
-                switch (column) {
-                case Note.COLOR:
-                case Note.STORAGE_MODE:
-                    query = noteRef.orderByChild(column).equalTo((Integer) value);
-                    break;
-                case Note.IS_DONE:
-                    query = noteRef.orderByChild(column).equalTo((Boolean) value);
-                    break;
-                default:
-                    break;
+                if (column.equals(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE)) {
+                    selection = DatabaseSpec.NoteDB.FIELD_STORAGE_MODE + " = ?";
+                } else if (column.equals(DatabaseSpec.NoteDB.FIELD_COLOR)) {
+                    selection = DatabaseSpec.NoteDB.FIELD_COLOR + " = ?";
+                } else if (column.equals(DatabaseSpec.NoteDB.FIELD_IS_DONE)) {
+                    selection = DatabaseSpec.NoteDB.FIELD_IS_DONE + " = ?";
                 }
+
+                selectionArgs = new String[]{String.valueOf(value)};
             }
 
-            if (query != null) {
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            noteList.add(snapshot.getValue(Note.class));
-                        }
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG, "onCancelled: getAllEntities (note) error : " + databaseError.getMessage());
-                    }
-                });
-            } else {
-                noteRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            noteList.add(snapshot.getValue(Note.class));
-                        }
-                    }
+            Cursor cursor = db.query(DatabaseSpec.NoteDB.TABLE_NAME, projection, selection, selectionArgs, null, null, orderBy);
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG, "onCancelled: getAllEntities all note error : " + databaseError.getMessage());
-                    }
-                });
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    int id = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_PKEY));
+                    String title = cursor.getString(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_TITLE));
+                    int color = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_COLOR));
+                    boolean isDone = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_IS_DONE)) > 0;
+                    int storageMode = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE));
+                    long lastModified = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED));
+                    long deletedTime = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_DELETED_TIME));
+                    list.add(new Note(id, title, color, isDone, storageMode, lastModified, deletedTime));
+                } while (cursor.moveToNext());
+
+                cursor.close();
             }
+
+            return list;
         }
-
-        return noteList;
     }
 
     @Override
     public void updateEntity(Note note) {
-        DatabaseReference noteRef = FirebaseUtil.getNoteRef();
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        if (noteRef != null) {
-            noteRef.
+            ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.NoteDB.FIELD_TITLE, note.getTitle());
+            values.put(DatabaseSpec.NoteDB.FIELD_COLOR, note.getColor());
+            values.put(DatabaseSpec.NoteDB.FIELD_IS_DONE, note.isDone() ? 1 : 0);
+            values.put(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE, note.getStorageMode());
+            values.put(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED, note.getLastModified());
+            values.put(DatabaseSpec.NoteDB.FIELD_DELETED_TIME, note.getDeletedTime());
+
+            String selection = DatabaseSpec.NoteDB.FIELD_PKEY + " = ?";
+            String[] selectionArgs = {
+                    String.valueOf(note.getId())
+            };
+
+            db.update(DatabaseSpec.NoteDB.TABLE_NAME, values, selection, selectionArgs);
+
+            if (FirebaseUtil.getCurrentUser() != null) {
+                fbNoteDAOImpl.updateEntity(note);
+            }
         }
     }
 
@@ -166,26 +215,33 @@ public class NoteDAOImpl implements EntityDAO<Note> {
             };
 
             db.delete(DatabaseSpec.NoteDB.TABLE_NAME, selection, selectionArgs);
+
+            if (FirebaseUtil.getCurrentUser() != null) {
+                fbNoteDAOImpl.deleteEntity(note);
+            }
         }
     }
 
-    @SuppressWarnings("unused")
-    public ArrayList<Note> getAllEntities() {
+    public ArrayList<Note> getAllLocalNotes() {
         return getAllEntities(null, 0);
     }
 
+    public ArrayList<Note> getAllServerNotes() {
+        return fbNoteDAOImpl.getAllEntities();
+    }
+
     public ArrayList<Note> getAllNotesByStorageMode(int storageMode) {
-        return getAllEntities(FirebaseUtil.Note.FIELD_STORAGE_MODE, storageMode);
+        return getAllEntities(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE, storageMode);
     }
 
     @SuppressWarnings("unused")
     public ArrayList<Note> getAllNotesByColor(int color) {
-        return getAllEntities(FirebaseUtil.Note.FIELD_COLOR, color);
+        return getAllEntities(DatabaseSpec.NoteDB.FIELD_COLOR, color);
     }
 
     @SuppressWarnings("unused")
     public ArrayList<Note> getAllNotesByIsDone(boolean isDone) {
-        return getAllEntities(FirebaseUtil.Note.FIELD_IS_DONE, isDone);
+        return getAllEntities(DatabaseSpec.NoteDB.FIELD_IS_DONE, isDone ? 1 : 0);
     }
 
     public void moveNoteToTrash(Note note) {
@@ -202,4 +258,25 @@ public class NoteDAOImpl implements EntityDAO<Note> {
         note.setStorageMode(Common.NOTE_STORAGE_MODE_ACTIVE);
         updateEntity(note);
     }
+
+//    public boolean isDataSynchronized() {
+//        boolean isSynced = true;
+//        ArrayList<Note> localNote = new ArrayList<>();
+//        ArrayList<Note> serverNote = new ArrayList<>();
+//
+//        localNote = getAllEntities();
+//        serverNote = fbNoteDAOImpl.getAllEntities();
+//
+//        int localSize = localNote.size();
+//        int serverSize = serverNote.size();
+//
+//        if (localSize != serverSize) {
+//            return false;
+//        } else {
+//            for (int i = 0; i < localSize; i++) {
+//
+//            }
+//        }
+//
+//    }
 }

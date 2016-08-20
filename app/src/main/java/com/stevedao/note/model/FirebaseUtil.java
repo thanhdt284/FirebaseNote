@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 /**
  * Created by thanh.dao on 8/4/2016.
@@ -17,8 +18,8 @@ public class FirebaseUtil {
     public static FirebaseDatabase getDatabaseInstance() {
         if (mDatabase == null) {
             mDatabase = FirebaseDatabase.getInstance();
-            mDatabase.setPersistenceEnabled(true);
-            enableSync();
+//            mDatabase.setPersistenceEnabled(true);
+//            enableSync();
         }
 
         return mDatabase;
@@ -32,7 +33,7 @@ public class FirebaseUtil {
     public static DatabaseReference getNoteRef() {
         String userId = getCurrentUserId();
         if (userId != null) {
-            return getBaseRef().child(Note.ROOT).child(getCurrentUserId());
+            return getBaseRef().child(DatabaseSpec.NoteDB.TABLE_NAME).child(getCurrentUserId());
         } else {
             return null;
         }
@@ -42,7 +43,7 @@ public class FirebaseUtil {
     public static DatabaseReference getItemRef() {
         String userId = getCurrentUserId();
         if (userId != null) {
-            return getBaseRef().child(Item.ROOT).child(getCurrentUserId());
+            return getBaseRef().child(DatabaseSpec.ItemDB.TABLE_NAME).child(getCurrentUserId());
         } else {
             return null;
         }
@@ -97,7 +98,10 @@ public class FirebaseUtil {
         if (itemRef != null) {
             itemRef.keepSynced(true);
         }
-
     }
     ////////////////////////
+
+    public static Object getCurrentTime() {
+        return ServerValue.TIMESTAMP;
+    }
 }

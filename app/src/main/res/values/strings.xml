@@ -19,4 +19,8 @@
     <string name="string_restore">restore</string>
     <string name="string_note_is_deleted">Note is deleted</string>
     <string name="string_note_is_permanently_deleted">note is permanently deleted</string>
+    <string name="string_signin">Sign In</string>
+    <string name="string_logging_in">Logging in ...</string>
+    <string name="string_sign_out">Sign out</string>
+    <string name="string_synchronizing_with_server">Synchronizing with server ...</string>
 </resources>

@@ -28,6 +28,14 @@ public class User extends Entity{
         this.photoUrl = photoUrl;
     }
 
+    public User(String id, String email, String displayName, String photoUrl) {
+        super(id);
+        this.email = email;
+        this.displayName = displayName;
+        this.photoUrl = photoUrl;
+    }
+
+
     public String getEmail() {
         return email;
     }
@@ -55,6 +63,10 @@ public class User extends Entity{
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
 
-        result.put()
+        result.put(EMAIL, email);
+        result.put(DISPLAY_NAME, displayName);
+        result.put(PHOTO_URL, photoUrl);
+
+        return result;
     }
 }

@@ -1,9 +1,8 @@
 package com.stevedao.note.view;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.firebase.note.R;
-import com.stevedao.note.model.ColorPickerInterface;
+import android.graphics.PorterDuff;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -12,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
+import com.stevedao.note.model.ColorPickerInterface;
 
 /**
  * Created by thanh.dao on 12/04/2016.

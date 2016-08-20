@@ -1,39 +1,73 @@
 package com.stevedao.note.control;
 
-import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.Intent;
 import android.firebase.note.R;
-import com.stevedao.note.model.Note;
-import com.stevedao.note.view.NoteInterface;
-import com.stevedao.note.view.NoteListInterface;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
+import com.facebook.AccessToken;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.stevedao.note.model.FirebaseUtil;
+import com.stevedao.note.model.Note;
+import com.stevedao.note.model.User;
+import com.stevedao.note.model.UserDAOImpl;
+import com.stevedao.note.view.NoteInterface;
+import com.stevedao.note.view.NoteListInterface;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SearchView
-        .OnQueryTextListener {
+        .OnQueryTextListener, GoogleApiClient.OnConnectionFailedListener {
+    private static final String TAG = "MainActivity";
+    private static final int RC_SIGN_IN = 100;
+    private static final String DIALOG_FRAGMENT_TAG = "DIALOG_FRAGMENT_TAG";
     private DrawerLayout mDrawerLayout;
     private NoteFragment mNoteFragment;
     private NoteListFragment mNoteListFragment;
     private FloatingActionButton mainFAB;
     private int mCurrentMode;
     private String mCurrentTitle;
+    private GoogleApiClient mGoogleApiClient;
+    private LoginFragment mLoginFragment;
+    private Context mContext;
+    private UserDAOImpl mUserDAO;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mContext = this;
+
+        mUserDAO = new UserDAOImpl(mContext);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_activity_toolbar);
         setSupportActionBar(toolbar);
@@ -55,24 +89,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mNavigationView.setNavigationItemSelectedListener(this);
         }
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        mGoogleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API,
+                        new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail()
+                                .requestProfile().requestIdToken(getString(R.string.default_web_client_id)).build())
+                .build();
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
 
         mNoteListFragment = new NoteListFragment();
         mNoteListFragment.setInterface(mNoteListInterface);
 
+        mNoteFragment = new NoteFragment();
+        mNoteFragment.setInterface(mNoteInterface);
+
+        mLoginFragment = new LoginFragment();
+        mLoginFragment.setInterface(mLoginInterface);
+
         if (getFragmentManager().findFragmentById(R.id.note_list_fragment_container) == null) {
             if (findViewById(R.id.note_list_fragment_container) != null) {
-                ft.replace(R.id.note_list_fragment_container, mNoteListFragment);
+                if (FirebaseUtil.getCurrentUser() != null) {
+                    ft.replace(R.id.note_list_fragment_container, mNoteListFragment);
+                } else {
+                    ft.replace(R.id.note_list_fragment_container, mLoginFragment);
+                }
             }
         }
 //        mNoteListFragment.show();
 
-        mNoteFragment = new NoteFragment();
-        mNoteFragment.setInterface(mNoteInterface);
 
         if (getFragmentManager().findFragmentById(R.id.note_fragment_container) == null) {
             if (findViewById(R.id.note_fragment_container) != null) {
-                ft.setCustomAnimations(R.animator.enter, R.animator.exit);
+//                ft.setCustomAnimations(R.animator.enter, R.animator.exit);
                 ft.replace(R.id.note_fragment_container, mNoteFragment);
             }
         }
@@ -98,6 +147,102 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                GoogleSignInAccount account = result.getSignInAccount();
+                if (account != null) {
+                    AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+                    showDialog(getResources().getString(R.string.string_logging_in));
+                    FirebaseUtil.getAuthInstance().signInWithCredential(credential)
+                            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    hideDialog();
+                                    if (task.isSuccessful()) {
+                                        Log.w(TAG, "onComplete: " + task.getResult().getUser().getEmail());
+                                        handleLoginAction();
+                                        invalidateOptionsMenu();
+                                        logInCompleted();
+                                    } else {
+                                        Log.e(TAG, "onComplete: Authentication failed.");
+                                        Toast.makeText(mContext, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                }
+            } else {
+                Toast.makeText(mContext, "", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onActivityResult: Google sign in failed");
+            }
+        } else {
+            if (mLoginFragment != null) {
+                mLoginFragment.activeActivityResult(requestCode, resultCode, data);
+            }
+        }
+    }
+
+    private void logInCompleted() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if (mNoteListFragment != null) {
+            ft.replace(R.id.note_list_fragment_container, mNoteListFragment).commit();
+        }
+
+        showDialog(getResources().getString(R.string.string_synchronizing_with_server));
+        mNoteListFragment.loginSynchronize();
+    }
+
+    private void handleLoginAction() {
+        String uId = FirebaseUtil.getCurrentUserId();
+        if (uId != null) {
+            FirebaseUser currentUser = FirebaseUtil.getCurrentUser();
+            User user = new User(uId, currentUser.getEmail(), currentUser.getDisplayName(),
+                                 currentUser.getPhotoUrl() == null ? "" : currentUser.getPhotoUrl().toString());
+
+            if (mUserDAO != null) {
+                mUserDAO.addEntity(user);
+            }
+        }
+    }
+
+    public void hideDialog() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getExistingDialogFragment();
+        if (prev != null) {
+            ft.remove(prev).commit();
+        }
+    }
+
+    private Fragment getExistingDialogFragment() {
+        return getSupportFragmentManager().findFragmentByTag(DIALOG_FRAGMENT_TAG);
+    }
+
+    public void showDialog(String message) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getExistingDialogFragment();
+        if (prev == null) {
+            ProgressDialogFragment fragment = ProgressDialogFragment.newInstance(message);
+            //            fragment.show(ft, DIALOG_FRAGMENT_TAG);
+            ft.add(fragment, DIALOG_FRAGMENT_TAG);
+            ft.commitAllowingStateLoss();
+        }
+    }
+
+    private LoginFragment.LoginFragmentInterface mLoginInterface = new LoginFragment.LoginFragmentInterface() {
+        @Override
+        public void ggSignIn() {
+            Intent loginIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+            startActivityForResult(loginIntent, RC_SIGN_IN);
+        }
+
+        @Override
+        public void fbSignIn(AccessToken token) {
+
+        }
+    };
+
     private NoteInterface mNoteInterface = new NoteInterface() {
         @Override
         public void onHideFragment(int mode, int position, int noteId) {
@@ -122,13 +267,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_search:
+        case R.id.action_search:
 
-                break;
-            default:
-                break;
+            break;
+        case R.id.action_sign_out:
+            if (mLoginFragment != null) {
+                signOut();
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.note_list_fragment_container, mLoginFragment).commit();
+            }
+            break;
+        default:
+            break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void signOut() {
+        FirebaseUtil.getAuthInstance().signOut();
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+        if (mNoteListFragment != null) {
+            mNoteListFragment.removeAllData();
+        }
     }
 
     @Override
@@ -233,4 +393,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mNoteListFragment.onQueryTextChange(newText);
         return true;
     }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.w(TAG, "onConnectionFailed: " + connectionResult.getErrorMessage());
+    }
+
+
 }

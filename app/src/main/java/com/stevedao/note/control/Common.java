@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import java.text.Normalizer;
+import java.util.Calendar;
 import java.util.regex.Pattern;
 
 /**
@@ -24,8 +25,8 @@ public class Common {
     public static final int GET_ITEM_CONTENT_ACTION_LIST = 0;
     public static final int GET_ITEM_CONTENT_ACTION_SEND = 1;
 
-//    public static final int NOTE_LIST_NORMAL_MODE = 0;
-//    public static final int NOTE_LIST_SELECTION_MODE = 1;
+    public static final int LOGIN_NOTE_SYNC = 0;
+    public static final int LOGIN_ITEM_SYNC = 1;
 
     public static void showIME(Context context, View view) {
         if (context != null && view != null) {
@@ -42,7 +43,7 @@ public class Common {
     }
 
     public static int getToolbarHeight(Context context) {
-        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(new int[]{R.attr.actionBarSize});
+        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(new int[]{ R.attr.actionBarSize});
         int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
         styledAttributes.recycle();
         return toolbarHeight;
@@ -62,5 +63,10 @@ public class Common {
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 //        return pattern.matcher(temp).replaceAll("");
         return pattern.matcher(temp).replaceAll("").replaceAll("Đ", "D").replaceAll("đ", "d");
+    }
+
+    public static long getCurrentTimeMilisecs() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.getTimeInMillis();
     }
 }

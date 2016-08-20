@@ -1,34 +1,32 @@
 package com.stevedao.note.control;
 
-import android.app.Fragment;
+import java.util.ArrayList;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.firebase.note.R;
-import com.stevedao.note.model.Item;
-import com.stevedao.note.model.ItemDAOImpl;
-import com.stevedao.note.model.Note;
-import com.stevedao.note.model.NoteDAOImpl;
-import com.stevedao.note.view.NoteInterface;
-import com.stevedao.note.view.NoteDetailAdapterInterface;
-import com.stevedao.note.view.NoteDetailAdapter;
-import com.stevedao.note.view.touchhelper.ItemTouchHelperCallback;
-import com.stevedao.note.view.touchhelper.OnStartDragListener;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import com.stevedao.note.model.Item;
+import com.stevedao.note.model.ItemDAOImpl;
+import com.stevedao.note.model.Note;
+import com.stevedao.note.model.NoteDAOImpl;
+import com.stevedao.note.view.NoteDetailAdapter;
+import com.stevedao.note.view.NoteDetailAdapterInterface;
+import com.stevedao.note.view.NoteInterface;
+import com.stevedao.note.view.touchhelper.ItemTouchHelperCallback;
+import com.stevedao.note.view.touchhelper.OnStartDragListener;
 
 /**
  * Created by thanh.dao on 29/04/2016.
@@ -67,8 +65,8 @@ public class NoteFragment extends Fragment {
     }
 
     private void initFragment(View fragmentView) {
-        noteDAO = new NoteDAOImpl(mContext);
-        itemDAO = new ItemDAOImpl(mContext);
+        noteDAO = NoteDAOImpl.getInstance(mContext);
+        itemDAO = ItemDAOImpl.getInstance(mContext);
 
 //        Intent intent = getIntent();
 //        mode = intent.getIntExtra("mode", 0);
@@ -170,19 +168,17 @@ public class NoteFragment extends Fragment {
         }
 
         if (noteDAO == null) {
-            noteDAO = new NoteDAOImpl(mContext);
+            noteDAO = NoteDAOImpl.getInstance(mContext);
         }
 
         if (itemDAO == null) {
-            itemDAO = new ItemDAOImpl(mContext);
+            itemDAO = ItemDAOImpl.getInstance(mContext);
         }
 
-        Date current = new Date();
-        long timeMilisec = current.getTime();
-        mNote.setLastModified(timeMilisec);
+        long currentTime = Common.getCurrentTimeMilisecs();
+        mNote.setLastModified(currentTime);
         if (mNote.getTitle().equals("")) {
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-            mNote.setTitle(formatter.format(current));
+            mNote.setTitle(DateUtils.getRelativeTimeSpanString(currentTime).toString());
         }
 
         boolean isDone = true;

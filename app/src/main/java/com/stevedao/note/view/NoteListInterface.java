@@ -1,5 +1,6 @@
 package com.stevedao.note.view;
 
+
 import com.stevedao.note.model.Note;
 
 /**

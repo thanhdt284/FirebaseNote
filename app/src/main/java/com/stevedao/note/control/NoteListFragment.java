@@ -1,24 +1,17 @@
 package com.stevedao.note.control;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.firebase.note.R;
-import com.stevedao.note.model.Item;
-import com.stevedao.note.model.ItemDAOImpl;
-import com.stevedao.note.model.Note;
-import com.stevedao.note.model.NoteDAOImpl;
-import com.stevedao.note.view.NoteListAdapter;
-import com.stevedao.note.view.NoteListAdapterInterface;
-import com.stevedao.note.view.NoteListInterface;
-import com.stevedao.note.view.touchhelper.ItemTouchHelperCallback;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -30,6 +23,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import com.stevedao.note.model.Item;
+import com.stevedao.note.model.ItemDAOImpl;
+import com.stevedao.note.model.Note;
+import com.stevedao.note.model.NoteDAOImpl;
+import com.stevedao.note.view.ITaskResponse;
+import com.stevedao.note.view.NoteListAdapter;
+import com.stevedao.note.view.NoteListAdapterInterface;
+import com.stevedao.note.view.NoteListInterface;
+import com.stevedao.note.view.touchhelper.ItemTouchHelperCallback;
 
 /**
  * Created by thanh.dao on 26/05/2016.
@@ -51,6 +53,8 @@ public class NoteListFragment extends Fragment {
     private ActionModeCallback actionModeCallBack;
     private ActionMode actionmode;
     private ItemTouchHelperCallback touchCallback;
+    private HashMap<Integer, Boolean> loginDataSyncKey;
+    private MainActivity mainActivity;
 
     private static final String[] titles = {"Breads", "Dairy products", "Eggs", "Legumes", "Edible plants", "Meat",
             "Edible nuts and seeds", "Cereals", "Seafood", "Staple foods", "Breads", "Dairy products", "Eggs",
@@ -84,7 +88,11 @@ public class NoteListFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mContext = getActivity();
+        mainActivity = (MainActivity) getActivity();
         actionModeCallBack = new ActionModeCallback();
+        loginDataSyncKey = new HashMap<>();
+        loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, false);
+        loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, false);
     }
 
     @Nullable
@@ -98,8 +106,11 @@ public class NoteListFragment extends Fragment {
     }
 
     private void initFragment() {
-        mNoteDAO = new NoteDAOImpl(mContext);
-        mItemDAO = new ItemDAOImpl(mContext);
+        mNoteDAO = NoteDAOImpl.getInstance(mContext);
+        mItemDAO = ItemDAOImpl.getInstance(mContext);
+
+        mNoteDAO.setFirebaseInterface(fbNoteInterface);
+        mItemDAO.setFirebaseInterface(fbItemInterface);
 
         TypedArray colorArray = mContext.getResources().obtainTypedArray(R.array.color_list);
         int[] colorList = new int[9];
@@ -147,6 +158,46 @@ public class NoteListFragment extends Fragment {
 
         getData(mCurrentMode);
     }
+
+    private ITaskResponse fbNoteInterface = new ITaskResponse() {
+        @Override
+        public void onResponse(Object... params) {
+            if (params != null) {
+                if (params[0] instanceof Integer && params[0] == 0) {
+                    if (mNoteDAO != null && params[1] instanceof ArrayList) {
+                        mNoteDAO.addEntities((ArrayList<Note>) params[1]);
+                        loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, true);
+                        if (loginDataSyncKey.get(Common.LOGIN_ITEM_SYNC)) {
+                            mainActivity.hideDialog();
+
+                            loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, false);
+                            loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, false);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    private ITaskResponse fbItemInterface = new ITaskResponse() {
+        @Override
+        public void onResponse(Object... params) {
+            if (params != null) {
+                if (params[0] instanceof Integer && params[0] == Common.LOGIN_ITEM_SYNC) {
+                    if (mNoteDAO != null && params[1] instanceof ArrayList) {
+                        mNoteDAO.addEntities((ArrayList<Note>) params[1]);
+                        loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, true);
+                        if (loginDataSyncKey.get(Common.LOGIN_NOTE_SYNC)) {
+                            mainActivity.hideDialog();
+
+                            loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, false);
+                            loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, false);
+                        }
+                    }
+                }
+            }
+        }
+    };
 
 //    public void show() {
 //        if (mParentView == null) {
@@ -342,7 +393,7 @@ public class NoteListFragment extends Fragment {
     public void initSampleData() {
         int size = titles.length;
         Random random = new Random();
-        ItemDAOImpl mItemDAO = new ItemDAOImpl(mContext);
+        ItemDAOImpl mItemDAO = ItemDAOImpl.getInstance(mContext);
 
         for (int i = 0; i < size; i++) {
             //init note data
@@ -350,9 +401,7 @@ public class NoteListFragment extends Fragment {
             if (i == size - 1) {
                 note.setStorageMode(Common.NOTE_STORAGE_MODE_TRASH);
 
-                Date current = new Date();
-                long timeMilisec = current.getTime();
-                note.setDeletedTime(timeMilisec);
+                note.setDeletedTime(Common.getCurrentTimeMilisecs());
             } else if (i > 7 && i<size-1) {
                 note.setStorageMode(Common.NOTE_STORAGE_MODE_ARCHIVE);
             } else {
@@ -361,9 +410,8 @@ public class NoteListFragment extends Fragment {
             note.setColor(Math.abs(random.nextInt()) % 8);
             note.setTitle(titles[i]);
             note.setIsDone(false);
-            Date current = new Date();
-            long milisecTime = current.getTime();
-            note.setLastModified(milisecTime);
+
+            note.setLastModified(Common.getCurrentTimeMilisecs());
             mNoteDAO.addEntity(note);
             note.setFullContent(mItemDAO.getFullContent(note.getId(), Common.GET_ITEM_CONTENT_ACTION_LIST));
             mNoteList.add(note);
@@ -379,6 +427,33 @@ public class NoteListFragment extends Fragment {
         mNoteListAdapter.notifyDataSetChanged();
     }
 
+    public void removeAllData() {
+//        if (mNoteDAO != null) {
+//            mNoteDAO.
+//        }
+
+    }
+
+    public void loginSynchronize() {
+        ArrayList<Note> allNotes = mNoteDAO.getAllLocalNotes();
+        ArrayList<Item> allItems = mItemDAO.getAllLocalItems();
+
+        uploadLocalData(allNotes, allItems);
+        downloadServerData();
+    }
+
+    private void uploadLocalData(ArrayList<Note> localNotes, ArrayList<Item> localItems) {
+        mNoteDAO.addEntities(localNotes);
+        mItemDAO.addEntities(localItems);
+    }
+
+    private void downloadServerData() {
+        ArrayList<Note> serverNotes = mNoteDAO.getAllLocalNotes();
+        ArrayList<Item> serverItems = mItemDAO.getAllLocalItems();
+
+        mNoteDAO.getAllServerNotes();
+        mItemDAO.getAllServerItems();
+    }
 
     private final class ActionModeCallback implements ActionMode.Callback {
 

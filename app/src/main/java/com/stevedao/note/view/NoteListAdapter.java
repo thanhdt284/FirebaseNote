@@ -1,31 +1,31 @@
 package com.stevedao.note.view;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import android.content.Context;
-import android.graphics.Paint;
 import android.firebase.note.R;
-import com.stevedao.note.control.Common;
-import com.stevedao.note.model.Note;
-import com.stevedao.note.view.touchhelper.ItemTouchHelperAdapter;
-import com.stevedao.note.view.touchhelper.ItemTouchHelperViewHolder;
+import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import android.util.SparseBooleanArray;
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.stevedao.note.control.Common;
+import com.stevedao.note.model.Note;
+import com.stevedao.note.view.touchhelper.ItemTouchHelperAdapter;
+import com.stevedao.note.view.touchhelper.ItemTouchHelperViewHolder;
 
 /**
  * Created by thanh.dao on 20/04/2016.
  *
  */
-public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteListViewHolder> implements ItemTouchHelperAdapter{
+public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteListViewHolder> implements
+        ItemTouchHelperAdapter {
     private SparseBooleanArray selectedItems;
     private Context mContext;
     private ArrayList<Note> mNoteData;
@@ -34,7 +34,6 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteLi
     private NoteListAdapterInterface mInterface;
     private String searchingText;
     private boolean isSearching;
-    private String TAG = "NoteListAdapter";
 
     public NoteListAdapter(Context context, ArrayList<Note> noteData, int[] colorList, NoteListAdapterInterface noteInterface) {
         mContext = context;

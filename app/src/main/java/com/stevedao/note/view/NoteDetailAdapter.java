@@ -2,15 +2,8 @@ package com.stevedao.note.view;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Paint;
-import com.stevedao.note.control.Common;
-import com.stevedao.note.model.ColorPickerInterface;
-import com.stevedao.note.model.Item;
 import android.firebase.note.R;
-import com.stevedao.note.model.Note;
-import com.stevedao.note.view.touchhelper.ItemTouchHelperAdapter;
-import com.stevedao.note.view.touchhelper.ItemTouchHelperViewHolder;
-import com.stevedao.note.view.touchhelper.OnStartDragListener;
+import android.graphics.Paint;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -30,6 +23,13 @@ import android.widget.RelativeLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.stevedao.note.control.Common;
+import com.stevedao.note.model.ColorPickerInterface;
+import com.stevedao.note.model.Item;
+import com.stevedao.note.model.Note;
+import com.stevedao.note.view.touchhelper.ItemTouchHelperAdapter;
+import com.stevedao.note.view.touchhelper.ItemTouchHelperViewHolder;
+import com.stevedao.note.view.touchhelper.OnStartDragListener;
 
 /**
  * Created by thanh.dao on 4/10/2016.

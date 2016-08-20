@@ -1,11 +1,11 @@
 package com.stevedao.note.view;
 
 import android.content.Context;
+import android.firebase.note.R;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.firebase.note.R;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;

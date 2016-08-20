@@ -1,48 +1,33 @@
 package com.stevedao.note.model;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by thanh.dao on 07/04/2016.
- *
  */
 
-public abstract class Note extends Entity {
-
-    public static final String ROOT = "notes";
-    public static final String TITLE = "title";
-    public static final String COLOR = "COLOR";
-    public static final String IS_DONE = "is_done";
-    public static final String STORAGE_MODE = "storage_mode";
-    public static final String LAST_MODIFIED = "last_modified";
-    public static final String DELETED_TIME = "deleted_time";
-    public static final String FULL_CONTENT = "full_content";
-
-    private final static int DEFAULT_COLOR = 7;
+public class Note extends Entity {
     private String title;
     private int color;
     private boolean isDone;
     private int storageMode;
     private long lastModified;
     private long deletedTime;
+    private String fullContent;
 
     public Note() {
-        this.title = "";
-        this.color = DEFAULT_COLOR;
-        this.isDone = false;
-        this.storageMode = 0;
-        Date current = new Date();
-        this.lastModified = current.getTime();
-        this.deletedTime = 0;
     }
 
     @SuppressWarnings("unused")
-    public Note(String title, int color, boolean isDone, int storageMode, long lastModified) {
+    public Note(String title, int color, boolean isDone, int storageMode, long lastModified, long deletedTime) {
         this.title = title;
         this.color = color;
         this.isDone = isDone;
         this.storageMode = storageMode;
         this.lastModified = lastModified;
+        this.deletedTime = deletedTime;
     }
 
     public Note(int id, String title, int color, boolean isDone, int storageMode, long lastModified, long deletedTime) {
@@ -53,6 +38,11 @@ public abstract class Note extends Entity {
         this.storageMode = storageMode;
         this.lastModified = lastModified;
         this.deletedTime = deletedTime;
+    }
+
+    @Override
+    public Integer getId() {
+        return (Integer) super.getId();
     }
 
     public String getTitle() {
@@ -83,8 +73,8 @@ public abstract class Note extends Entity {
         return isDone;
     }
 
-    public void setIsDone(boolean done) {
-        isDone = done;
+    public void setIsDone(boolean isDone) {
+        this.isDone = isDone;
     }
 
     public int getStorageMode() {
@@ -103,4 +93,31 @@ public abstract class Note extends Entity {
         this.deletedTime = deletedTime;
     }
 
+    public String getFullContent() {
+        return fullContent;
+    }
+
+    public void setFullContent(String fullContent) {
+        this.fullContent = fullContent;
+    }
+
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> map = new HashMap<>();
+
+        map.put(DatabaseSpec.NoteDB.FIELD_PKEY, this.id);
+        map.put(DatabaseSpec.NoteDB.FIELD_TITLE, this.title);
+        map.put(DatabaseSpec.NoteDB.FIELD_COLOR, this.color);
+        map.put(DatabaseSpec.NoteDB.FIELD_IS_DONE, this.isDone);
+        map.put(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE, this.storageMode);
+        map.put(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED, this.lastModified);
+        map.put(DatabaseSpec.NoteDB.FIELD_DELETED_TIME, this.deletedTime);
+
+        return map;
+    }
+
+    public boolean isEqualTo(Note note) {
+        return (this.id == note.getId() && this.title.equals(note.getTitle()) && this.color == note.getColor() &&
+                this.isDone == note.isDone() && this.storageMode == note.getStorageMode() &&
+                this.lastModified == note.getLastModified() && this.deletedTime == note.getDeletedTime());
+    }
 }

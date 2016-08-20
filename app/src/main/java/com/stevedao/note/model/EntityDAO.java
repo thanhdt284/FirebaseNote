@@ -1,17 +1,18 @@
 package com.stevedao.note.model;
 
 import java.util.ArrayList;
+import com.stevedao.note.model.Entity;
 
 /**
  * Created by thanh.dao on 07/04/2016.
  *
  */
 public interface EntityDAO<T extends Entity> {
-    String addEntity(T t);
+    Object addEntity(T t);
 
-//    void addEntities(ArrayList<T> entities);
+    int addEntities(ArrayList<T> entities);
 
-    T getEntity(String key);
+    T getEntity(Object id);
 
     ArrayList<T> getAllEntities(String column, Object value);
 

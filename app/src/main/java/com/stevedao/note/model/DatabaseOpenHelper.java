@@ -19,7 +19,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
         return mInstance;
     }
 
-    public DatabaseOpenHelper(Context context) {
+    private DatabaseOpenHelper(Context context) {
         super(context, DatabaseSpec.DB_NAME, null, DatabaseSpec.DB_VERSION);
     }
 
@@ -29,6 +29,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper {
 //        DatabaseSpec.ItemDB.dropTable(db);
         DatabaseSpec.NoteDB.onCreate(db);
         DatabaseSpec.ItemDB.onCreate(db);
+        DatabaseSpec.UserDB.onCreate(db);
     }
 
     @SuppressWarnings("unused")
