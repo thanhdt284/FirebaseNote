@@ -16,12 +16,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import com.stevedao.note.model.Item;
-import com.stevedao.note.model.ItemDAOImpl;
+import com.stevedao.note.model.ItemDAOManager;
 import com.stevedao.note.model.Note;
-import com.stevedao.note.model.NoteDAOImpl;
+import com.stevedao.note.model.NoteDAOManager;
 import com.stevedao.note.view.NoteDetailAdapter;
 import com.stevedao.note.view.NoteDetailAdapterInterface;
 import com.stevedao.note.view.NoteInterface;
@@ -36,8 +37,8 @@ public class NoteFragment extends Fragment {
     private View mNoteFragmentView;
     private Context mContext;
     private View mParentView;
-    private NoteDAOImpl noteDAO;
-    private ItemDAOImpl itemDAO;
+    private NoteDAOManager noteDAO;
+    private ItemDAOManager itemDAO;
     private Note mNote;
     private NoteDetailAdapter mDetailAdapter;
     private ItemTouchHelper mItemTouchHelper;
@@ -59,14 +60,14 @@ public class NoteFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.e("thanh.dao", "Fragment onCreateView");
-        mNoteFragmentView = inflater.inflate(R.layout.activity_note, container, false);
+        mNoteFragmentView = inflater.inflate(R.layout.note_fragment_layout, container, false);
         initFragment(mNoteFragmentView);
         return mNoteFragmentView;
     }
 
     private void initFragment(View fragmentView) {
-        noteDAO = NoteDAOImpl.getInstance(mContext);
-        itemDAO = ItemDAOImpl.getInstance(mContext);
+        noteDAO = new NoteDAOManager(mContext);
+        itemDAO = new ItemDAOManager(mContext);
 
 //        Intent intent = getIntent();
 //        mode = intent.getIntExtra("mode", 0);
@@ -123,7 +124,7 @@ public class NoteFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mDetailAdapter);
 
-        ImageButton mBackButton = (ImageButton) mNoteFragmentView.findViewById(R.id.note_actionbar_back);
+        FrameLayout mBackButton = (FrameLayout) mNoteFragmentView.findViewById(R.id.note_actionbar_back_container);
         mBackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,15 +168,15 @@ public class NoteFragment extends Fragment {
             return;
         }
 
-        if (noteDAO == null) {
-            noteDAO = NoteDAOImpl.getInstance(mContext);
-        }
+//        if (noteDAO == null) {
+//            noteDAO = new NoteDAOManager(mContext);
+//        }
+//
+//        if (itemDAO == null) {
+//            itemDAO = new ItemDAOManager(mContext);
+//        }
 
-        if (itemDAO == null) {
-            itemDAO = ItemDAOImpl.getInstance(mContext);
-        }
-
-        long currentTime = Common.getCurrentTimeMilisecs();
+        long currentTime = System.currentTimeMillis();
         mNote.setLastModified(currentTime);
         if (mNote.getTitle().equals("")) {
             mNote.setTitle(DateUtils.getRelativeTimeSpanString(currentTime).toString());
@@ -194,22 +195,26 @@ public class NoteFragment extends Fragment {
         mNote.setIsDone(isDone);
 
         if (mode == Common.NOTE_ACTIVITY_NEW_ENTRY) {
-            noteDAO.addEntity(mNote);
+            noteDAO.addNote(mNote);
 
             for (Item item : mItemData) {
                 item.setNoteId(mNote.getId());
+                item.setFirebaseNoteId(mNote.getFirebaseId());
             }
 
-            itemDAO.addEntities(mItemData);
+            itemDAO.addItems(mItemData, false);
         } else {
-            noteDAO.updateEntity(mNote);
-            itemDAO.deleteItemsByNoteId(mNote.getId());
+            noteDAO.updateNote(mNote);
 
             for (Item item : mItemData) {
                 item.setNoteId(mNote.getId());
+                item.setFirebaseNoteId(mNote.getFirebaseId());
             }
 
-            itemDAO.addEntities(mItemData);
+            itemDAO.updateItemsByNote(mNote, mItemData);
+
+//            itemDAO.deleteItemsByNote(mNote.getId());
+//            itemDAO.addItems(mItemData, false);
         }
     }
 

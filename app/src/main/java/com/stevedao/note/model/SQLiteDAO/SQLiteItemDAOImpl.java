@@ -1,42 +1,26 @@
-package com.stevedao.note.model;
+package com.stevedao.note.model.SQLiteDAO;
 
+import java.util.ArrayList;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
-import java.util.ArrayList;
 import com.stevedao.note.control.Common;
-import com.stevedao.note.model.FirebaseDAO.FirebaseItemDAOImpl;
-import com.stevedao.note.view.ITaskResponse;
+import com.stevedao.note.model.EntityDAO;
+import com.stevedao.note.model.Item;
+import com.stevedao.note.model.Note;
 
 /**
  * Created by thanh.dao on 07/04/2016.
  *
  */
-public class ItemDAOImpl implements EntityDAO<Item> {
-    private static final String TAG = "ItemDAOImpl";
+public class SQLiteItemDAOImpl implements EntityDAO<Item> {
     private final DatabaseOpenHelper dbHelper;
-    private FirebaseItemDAOImpl firebaseItemDAO;
 
-    private static ItemDAOImpl itemDAO;
-
-    public static synchronized ItemDAOImpl getInstance(Context context) {
-        if (itemDAO == null) {
-            itemDAO = new ItemDAOImpl(context);
-        }
-        return itemDAO;
-    }
-
-    private ItemDAOImpl(Context context) {
+    public SQLiteItemDAOImpl(Context context) {
         dbHelper = DatabaseOpenHelper.getInstance(context);
-        firebaseItemDAO = new FirebaseItemDAOImpl();
-    }
-
-    public void setFirebaseInterface(ITaskResponse iInterface) {
-        firebaseItemDAO.setInterface(iInterface);
     }
 
     @Override
@@ -45,6 +29,8 @@ public class ItemDAOImpl implements EntityDAO<Item> {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.ItemDB.FIELD_FIREBASE_KEY, item.getFirebaseId());
+            values.put(DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY, item.getFirebaseNoteId());
             values.put(DatabaseSpec.ItemDB.FIELD_NOTE_ID, item.getNoteId());
             values.put(DatabaseSpec.ItemDB.FIELD_CONTENT, item.getContent());
             values.put(DatabaseSpec.ItemDB.FIELD_CHECKED, item.isChecked() ? 1 : 0);
@@ -53,12 +39,8 @@ public class ItemDAOImpl implements EntityDAO<Item> {
             int insertedId = (int) db.insert(DatabaseSpec.ItemDB.TABLE_NAME, null, values);
             if (insertedId >= 0) {
                 item.setId(insertedId);
-
-                if (FirebaseUtil.getCurrentUser() != null) {
-                    firebaseItemDAO.addEntity(item);
-                }
             } else {
-                Log.e(TAG, "addEntity: Add item error: insertedId = -1");
+                Log.e(Common.APPTAG, "SQLiteItemDAOImpl - addEntity: Add item error: insertedId = -1");
             }
 
             return insertedId;
@@ -76,9 +58,7 @@ public class ItemDAOImpl implements EntityDAO<Item> {
                 }
             }
 
-            if (FirebaseUtil.getCurrentUser() != null) {
-                firebaseItemDAO.addEntities(entities);
-            }
+            Log.e(Common.APPTAG, "SQLiteItemDAOImpl - addEntities: added " + count + " items");
             return count;
         }
     }
@@ -89,7 +69,8 @@ public class ItemDAOImpl implements EntityDAO<Item> {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             Item item = null;
 
-            String[] projection = { DatabaseSpec.ItemDB.FIELD_PKEY, DatabaseSpec.ItemDB.FIELD_NOTE_ID,
+            String[] projection = { DatabaseSpec.ItemDB.FIELD_PKEY, DatabaseSpec.ItemDB.FIELD_FIREBASE_KEY,
+                    DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY, DatabaseSpec.ItemDB.FIELD_NOTE_ID,
                     DatabaseSpec.ItemDB.FIELD_CONTENT, DatabaseSpec.ItemDB.FIELD_CHECKED,
                     DatabaseSpec.ItemDB.FIELD_INDEX };
             String selection = DatabaseSpec.ItemDB.FIELD_PKEY + " = ?";
@@ -100,6 +81,8 @@ public class ItemDAOImpl implements EntityDAO<Item> {
 
             if (cursor != null && cursor.moveToFirst()) {
                 item = new Item(cursor.getInt(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_PKEY)),
+                                cursor.getString(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_FIREBASE_KEY)),
+                                cursor.getString(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY)),
                                 cursor.getInt(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_NOTE_ID)),
                                 cursor.getString(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_CONTENT)),
                                 cursor.getInt(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_CHECKED)) > 0,
@@ -118,7 +101,8 @@ public class ItemDAOImpl implements EntityDAO<Item> {
             ArrayList<Item> list = new ArrayList<>();
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            String[] projection = { DatabaseSpec.ItemDB.FIELD_PKEY, DatabaseSpec.ItemDB.FIELD_NOTE_ID,
+            String[] projection = { DatabaseSpec.ItemDB.FIELD_PKEY, DatabaseSpec.ItemDB.FIELD_FIREBASE_KEY,
+                    DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY, DatabaseSpec.ItemDB.FIELD_NOTE_ID,
                     DatabaseSpec.ItemDB.FIELD_CONTENT, DatabaseSpec.ItemDB.FIELD_CHECKED,
                     DatabaseSpec.ItemDB.FIELD_INDEX };
 
@@ -128,6 +112,8 @@ public class ItemDAOImpl implements EntityDAO<Item> {
             if (column != null) {
                 if (column.equals(DatabaseSpec.ItemDB.FIELD_NOTE_ID)) {
                     selection = DatabaseSpec.ItemDB.FIELD_NOTE_ID + " = ?";
+                } else if (column.equals(DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY)) {
+                    selection = DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY + " = ?";
                 }
 
                 selectionArgs = new String[] { String.valueOf(value) };
@@ -136,9 +122,13 @@ public class ItemDAOImpl implements EntityDAO<Item> {
             Cursor cursor =
                     db.query(DatabaseSpec.ItemDB.TABLE_NAME, projection, selection, selectionArgs, null, null, null);
 
-            if (cursor != null && cursor.moveToNext()) {
+            if (cursor != null && cursor.moveToFirst()) {
                 do {
                     Item item = new Item(cursor.getInt(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_PKEY)),
+                                         cursor.getString(
+                                                 cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_FIREBASE_KEY)),
+                                         cursor.getString(
+                                                 cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY)),
                                          cursor.getInt(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_NOTE_ID)),
                                          cursor.getString(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_CONTENT)),
                                          cursor.getInt(cursor.getColumnIndex(DatabaseSpec.ItemDB.FIELD_CHECKED)) > 0,
@@ -159,19 +149,23 @@ public class ItemDAOImpl implements EntityDAO<Item> {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.ItemDB.FIELD_FIREBASE_KEY, item.getFirebaseId());
+            values.put(DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY, item.getFirebaseNoteId());
             values.put(DatabaseSpec.ItemDB.FIELD_NOTE_ID, item.getNoteId());
             values.put(DatabaseSpec.ItemDB.FIELD_CONTENT, item.getContent());
             values.put(DatabaseSpec.ItemDB.FIELD_CHECKED, item.isChecked() ? 1 : 0);
             values.put(DatabaseSpec.ItemDB.FIELD_INDEX, item.getIndex());
 
-            String selection = DatabaseSpec.ItemDB.FIELD_PKEY + " = ?";
-            String[] selectionArgs = { String.valueOf(item.getId()) };
+            String selection;
+            if (item.getFirebaseNoteId().equals("")) {
+                selection = DatabaseSpec.ItemDB.FIELD_PKEY + " = ?";
+            } else {
+                selection = DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY + " = ?";
+            }
+            String[] selectionArgs =
+                    { String.valueOf(item.getFirebaseNoteId().equals("") ? item.getId() : item.getFirebaseNoteId()) };
 
             db.update(DatabaseSpec.ItemDB.TABLE_NAME, values, selection, selectionArgs);
-
-            if (FirebaseUtil.getCurrentUser() != null) {
-                firebaseItemDAO.updateEntity(item);
-            }
         }
     }
 
@@ -180,76 +174,41 @@ public class ItemDAOImpl implements EntityDAO<Item> {
         synchronized (dbHelper) {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            String selection = DatabaseSpec.ItemDB.FIELD_PKEY + " = ?";
-            String[] selectionArgs = { String.valueOf(item.getId()) };
+            String selection;
+            if (item.getFirebaseNoteId().equals("")) {
+                selection = DatabaseSpec.ItemDB.FIELD_PKEY + " = ?";
+            } else {
+                selection = DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY + " = ?";
+            }
+            String[] selectionArgs =
+                    { String.valueOf(item.getFirebaseNoteId().equals("") ? item.getId() : item.getFirebaseNoteId()) };
 
             db.delete(DatabaseSpec.ItemDB.TABLE_NAME, selection, selectionArgs);
-
-            if (FirebaseUtil.getCurrentUser() != null) {
-                firebaseItemDAO.deleteEntity(item);
-            }
         }
     }
 
-    public int deleteItemsByNoteId(int noteId) {
+    public int deleteItemsByNote(Note note) {
         synchronized (dbHelper) {
-            if (FirebaseUtil.getCurrentUser() != null) {
-                firebaseItemDAO.deleteItemsByNoteId(noteId);
-            }
-
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            String selection = DatabaseSpec.ItemDB.FIELD_NOTE_ID + " = ?";
-            String[] selectionArgs = { String.valueOf(noteId) };
+            String selection = "";
+            if (note.getFirebaseId().equals("")) {
+                selection = DatabaseSpec.ItemDB.FIELD_NOTE_ID + " = ?";
+            } else {
+                selection = DatabaseSpec.ItemDB.FIELD_FIREBASE_NOTE_KEY + " = ?";
+            }
+            String[] selectionArgs =
+                    { String.valueOf(note.getFirebaseId().equals("") ? note.getId() : note.getFirebaseId()) };
 
             return db.delete(DatabaseSpec.ItemDB.TABLE_NAME, selection, selectionArgs);
         }
     }
 
-    public ArrayList<Item> getAllItemsByNoteId(int noteId) {
-        return getAllEntities(DatabaseSpec.ItemDB.FIELD_NOTE_ID, noteId);
-    }
-
-    public String getFullContent(int noteId, int action) {
-        ArrayList<Item> items = getAllItemsByNoteId(noteId);
-        String content = "";
-        for (Item item : items) {
-            String itemContent = item.getContent();
-            if (action == Common.GET_ITEM_CONTENT_ACTION_LIST) {
-                if (!itemContent.equals(""))
-                    content += "\u2022" + itemContent + "  ";
-            } else if (action == Common.GET_ITEM_CONTENT_ACTION_SEND) {
-                content += "[" + (item.isChecked() ? "x" : "") + "]" + " " + itemContent + "\n";
-            }
-        }
-
-        return content;
-    }
-
-    @SuppressWarnings("unused")
-    public int countConditionalItem(int noteId, boolean isChecked) {
+    public void deleteAllItemData() {
         synchronized (dbHelper) {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            int checked = isChecked ? 1 : 0;
-            String queryString = "select count(*) from " + DatabaseSpec.ItemDB.TABLE_NAME + " where " +
-                    DatabaseSpec.ItemDB.FIELD_NOTE_ID + " = " + noteId + " and " + DatabaseSpec.ItemDB.FIELD_CHECKED +
-                    " = " + checked;
-
-            Cursor mCount = db.rawQuery(queryString, null);
-            mCount.moveToFirst();
-            int count = mCount.getInt(0);
-            mCount.close();
-
-            return count;
+            db.delete(DatabaseSpec.ItemDB.TABLE_NAME, null, null);
         }
-    }
-
-    public ArrayList<Item> getAllLocalItems() {
-        return getAllEntities(null, 0);
-    }
-
-    public ArrayList<Item> getAllServerItems() {
-        return firebaseItemDAO.getAllEntities();
     }
 }

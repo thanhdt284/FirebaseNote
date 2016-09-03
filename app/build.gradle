@@ -1,13 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'android'
+            keyPassword 'th@nh280490'
+            storeFile file('notekeystore.jks')
+            storePassword 'th@nh280490'
+        }
+    }
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
-
+    buildToolsVersion '23.0.3'
     defaultConfig {
         applicationId "com.stevedao.note"
         minSdkVersion 16
         targetSdkVersion 23
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
     }
@@ -15,6 +23,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -27,14 +39,15 @@ dependencies {
     //google support lib
     compile 'com.android.support:cardview-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    //    compile 'com.android.support:recyclerview-v7:23.3.0'
 
     //google play services
     compile 'com.google.android.gms:play-services-auth:9.2.0'
-//    compile 'com.android.support:recyclerview-v7:23.3.0'
-//    compile 'com.android.support:appcompat-v7:23.3.0'
 
     // circle image lib
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+    compile 'de.hdodenhof:circleimageview:2.1.0'
 
     // firebase lib
     compile 'com.google.firebase:firebase-database:9.2.0'
@@ -43,6 +56,9 @@ dependencies {
     compile 'com.google.firebase:firebase-core:9.2.0'
     compile 'com.google.firebase:firebase-storage:9.2.0'
     compile 'com.google.firebase:firebase-common:9.2.0'
+
+    // facebook sdk
+    compile 'com.facebook.android:facebook-android-sdk:4.14.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

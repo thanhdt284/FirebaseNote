@@ -1,4 +1,4 @@
-package com.stevedao.note.model;
+package com.stevedao.note.view;
 
 /**
  * Created by thanh.dao on 13/04/2016.

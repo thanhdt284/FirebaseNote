@@ -1,4 +1,4 @@
-package com.stevedao.note.model;
+package com.stevedao.note.model.SQLiteDAO;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

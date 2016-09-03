@@ -6,8 +6,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.stevedao.note.control.Common;
 import com.stevedao.note.model.EntityDAO;
-import com.stevedao.note.model.FirebaseUtil;
+import com.stevedao.note.model.SQLiteDAO.DatabaseSpec;
 import com.stevedao.note.model.User;
 
 import java.util.ArrayList;
@@ -17,24 +18,26 @@ import java.util.ArrayList;
  *
  */
 public class FirebaseUserDAOImpl implements EntityDAO<User> {
-    private static final String TAG = "FirebaseUserDAOImpl";
-
     public FirebaseUserDAOImpl() {
     }
 
     @Override
     public Object addEntity(User user) {
-        DatabaseReference userRef = FirebaseUtil.getUserRef();
+        if (FirebaseUtil.getCurrentUser() != null) {
 
-        if (userRef != null) {
-            userRef.updateChildren(user.toMap(), new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError != null) {
-                        Log.e(TAG, "onComplete: addEntity Error " + databaseError.getMessage());
+            DatabaseReference userRef = FirebaseUtil.getUserRef();
+
+            if (userRef != null) {
+                userRef.updateChildren(user.toMap(), new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError != null) {
+                            Log.e(Common.APPTAG, "FirebaseUserDAOImpl - onComplete: addEntity Error " + databaseError
+                                    .getMessage());
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         return FirebaseUtil.getCurrentUserId();
@@ -56,12 +59,12 @@ public class FirebaseUserDAOImpl implements EntityDAO<User> {
             userRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    mUser[0] = dataSnapshot.getValue(User.class);
+                    mUser[0] = getUserFromSnapshot(dataSnapshot);
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.w(TAG, "onCancelled: get user Error " + databaseError.getMessage());
+                    Log.w(Common.APPTAG, "FirebaseUserDAOImpl - onCancelled: get user Error " + databaseError.getMessage());
                 }
             });
         }
@@ -79,24 +82,37 @@ public class FirebaseUserDAOImpl implements EntityDAO<User> {
 
     @Override
     public void updateEntity(User user) {
-        DatabaseReference userRef = FirebaseUtil.getUserRef();
-        if (userRef != null) {
-            userRef.setValue(user, new DatabaseReference.CompletionListener() {
-                @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError != null) {
-                        Log.e(TAG, "onComplete: Update user error: " + databaseError.getMessage());
+        if (FirebaseUtil.getCurrentUser() != null) {
+            DatabaseReference userRef = FirebaseUtil.getUserRef();
+            if (userRef != null) {
+                userRef.updateChildren(user.toMap(), new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        if (databaseError != null) {
+                            Log.e(Common.APPTAG, "FirebaseUserDAOImpl - onComplete: Update user error: " + databaseError.getMessage());
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 
     @Override
     public void deleteEntity(User user) {
-        DatabaseReference userRef = FirebaseUtil.getUserRef();
-        if (userRef != null) {
-            userRef.removeValue();
+        if (FirebaseUtil.getCurrentUser() != null) {
+            DatabaseReference userRef = FirebaseUtil.getUserRef();
+            if (userRef != null) {
+                userRef.removeValue();
+            }
         }
+    }
+
+    private User getUserFromSnapshot(DataSnapshot snapshot) {
+        String id = (String) snapshot.child(DatabaseSpec.UserDB.FIELD_PKEY).getValue();
+        String email = (String) snapshot.child(DatabaseSpec.UserDB.FIELD_EMAIL).getValue();
+        String displayName = (String) snapshot.child(DatabaseSpec.UserDB.FIELD_DISPLAY_NAME).getValue();
+        String photoUrl = (String) snapshot.child(DatabaseSpec.UserDB.FIELD_PHOTO_URL).getValue();
+
+        return new User(id, email, displayName, photoUrl);
     }
 }

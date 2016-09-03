@@ -7,14 +7,15 @@ import java.util.List;
 import android.content.Context;
 import android.firebase.note.R;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.stevedao.note.control.Common;
 import com.stevedao.note.model.Note;
 import com.stevedao.note.view.touchhelper.ItemTouchHelperAdapter;
@@ -26,8 +27,8 @@ import com.stevedao.note.view.touchhelper.ItemTouchHelperViewHolder;
  */
 public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteListViewHolder> implements
         ItemTouchHelperAdapter {
-    private SparseBooleanArray selectedItems;
     private Context mContext;
+    private SparseBooleanArray selectedItems;
     private ArrayList<Note> mNoteData;
     private ArrayList<Note> mOriginalData;
     private int[] mColorList;
@@ -61,13 +62,18 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteLi
             holder.mNoteTitle.setPaintFlags(holder.mNoteTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
         holder.mNoteTitle.setText(mNoteData.get(position).getTitle());
-        holder.mNoteContent.setText(mNoteData.get(position).getFullContent());
+        holder.mNoteContent.setText(DateUtils.getRelativeDateTimeString(mContext, mNoteData.get(position)
+                .getLastModified(), DateUtils.DAY_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
 
-        TextDrawable drawable = TextDrawable.builder()
-                .buildRound(mNoteData.get(position).getTitle().substring(0, 1).toUpperCase(),
-                            mColorList[mNoteData.get(position).getColor()]);
-        holder.mIndicator.setImageDrawable(drawable);
-//        holder.mIndicator.setColorFilter(mColorList[mNoteData.get(position).getColor()], PorterDuff.Mode.SRC_ATOP);
+//        Date date = new Date(mNoteData.get(position).getLastModified());
+//
+//        holder.mNoteContent.setText(DateFormat.getDateTimeInstance().format(date));
+
+//        TextDrawable drawable = TextDrawable.builder()
+//                .buildRound(mNoteData.get(position).getTitle().substring(0, 1).toUpperCase(),
+//                            mColorList[mNoteData.get(position).getColor()]);
+//        holder.mIndicator.setImageDrawable(drawable);
+        holder.mIndicator.setColorFilter(mColorList[mNoteData.get(position).getColor()], PorterDuff.Mode.SRC_ATOP);
 //        holder.backgroundLayout.setBackgroundColor(mColor100List[mNoteData.get(position).getColor()]);
 //        holder.backgroundLayout.setBackgroundColor(mContext.getResources().getColor(R.color.color_white));
 
@@ -126,6 +132,16 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteLi
         for (Integer i : selection) {
             notifyItemChanged(i);
         }
+    }
+
+    public void selectAll() {
+        selectedItems.clear();
+        int size = getItemCount();
+        for (int i = 0; i < size; i++) {
+            selectedItems.put(i, true);
+        }
+
+        notifyDataSetChanged();
     }
 
     public void toggleSelection(int position) {
@@ -266,7 +282,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteListAdapter.NoteLi
 
             mIndicator = (ImageView) itemView.findViewById(R.id.note_list_indicator);
             mNoteTitle = (TextView) itemView.findViewById(R.id.note_list_item_title_text);
-            mNoteContent = (TextView) itemView.findViewById(R.id.note_list_item_content_text);
+            mNoteContent = (TextView) itemView.findViewById(R.id.note_list_item_last_modified);
             mOverlayView = itemView.findViewById(R.id.selected_overlay);
 
             itemView.setOnClickListener(this);

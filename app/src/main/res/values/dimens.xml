@@ -24,7 +24,7 @@
     <dimen name="color_picker_window_offset_y">-55dp</dimen>
     <dimen name="note_list_item_color_indicator_width">40dp</dimen>
     <dimen name="note_list_item_horizontal_margin">16dp</dimen>
-    <dimen name="note_list_item_height">88dp</dimen>
+    <dimen name="note_list_item_height">80dp</dimen>
     <dimen name="note_list_item_vertical_margin">16dp</dimen>
     <dimen name="note_list_item_bottom_margin">20dp</dimen>
     <dimen name="note_list_item_title_text_size">16sp</dimen>
@@ -33,8 +33,10 @@
     <dimen name="note_list_top_padding">8dp</dimen>
     <dimen name="note_list_divider_height">1dp</dimen>
     <dimen name="note_actionbar_shadow_height">4dp</dimen>
-    <dimen name="signin_text_size">30sp</dimen>
-    <dimen name="signin_text_margin_top">40dp</dimen>
+    <dimen name="sign_in_text_size">30sp</dimen>
+    <dimen name="sign_in_text_margin_top">40dp</dimen>
+    <dimen name="drawer_icon_size">64dp</dimen>
+    <dimen name="drawer_icon_padding_top">40dp</dimen>
 
 
 </resources>

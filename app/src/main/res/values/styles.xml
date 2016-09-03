@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -24,7 +24,18 @@
         <item name="windowNoTitle">true</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">@color/colorPrimary</item>
+        <item name="android:textColor">@color/color_main_text</item>
     </style>
+
+    <style name="ActionBarTheme" parent="Base.ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/color_main_text</item>
+        <item name="colorControlHighlight">@color/color_common_background</item>
+        <item name="android:colorBackground">@color/color_white</item>
+        <item name="android:textColorHint">@color/color_hint_text</item>
+        <!--<item name="selectableItemBackground">?android:selectableItemBackground</item>-->
+        <!--<item name="selectableItemBackgroundBorderless">?android:selectableItemBackground</item>-->
+    </style>
+
 
     <style name="popup_window_animation">
         <item name="android:windowEnterAnimation">@anim/popup_show_anim</item>

@@ -1,7 +1,6 @@
 package com.stevedao.note.control;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -18,15 +17,16 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import com.stevedao.note.model.Item;
-import com.stevedao.note.model.ItemDAOImpl;
+import com.stevedao.note.model.ItemDAOManager;
 import com.stevedao.note.model.Note;
-import com.stevedao.note.model.NoteDAOImpl;
+import com.stevedao.note.model.NoteDAOManager;
 import com.stevedao.note.view.ITaskResponse;
 import com.stevedao.note.view.NoteListAdapter;
 import com.stevedao.note.view.NoteListAdapterInterface;
@@ -38,11 +38,10 @@ import com.stevedao.note.view.touchhelper.ItemTouchHelperCallback;
  *
  */
 public class NoteListFragment extends Fragment {
-
     private Context mContext;
     private View mNoteListFragment;
-    private NoteDAOImpl mNoteDAO;
-    private ItemDAOImpl mItemDAO;
+    private NoteDAOManager mNoteDAO;
+    private ItemDAOManager mItemDAO;
     private ArrayList<Note> mNoteList;
     private RecyclerView mNoteListView;
     private NoteListAdapter mNoteListAdapter;
@@ -83,6 +82,22 @@ public class NoteListFragment extends Fragment {
             {"Banana", "Banku", "Bean", "Black turtle bean", "Blue corn"}
     };
 
+    private ArrayList<Note> localNotes;
+    private ArrayList<Item> localItems;
+
+    public NoteListFragment() {
+        loginDataSyncKey = new HashMap<>();
+        loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, false);
+        loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, false);
+
+
+        mNoteDAO = new NoteDAOManager(mContext);
+        mItemDAO = new ItemDAOManager(mContext);
+
+        mNoteDAO.setInterface(fbNoteInterface);
+        mItemDAO.setInterface(fbItemInterface);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,9 +105,7 @@ public class NoteListFragment extends Fragment {
         mContext = getActivity();
         mainActivity = (MainActivity) getActivity();
         actionModeCallBack = new ActionModeCallback();
-        loginDataSyncKey = new HashMap<>();
-        loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, false);
-        loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, false);
+
     }
 
     @Nullable
@@ -106,12 +119,6 @@ public class NoteListFragment extends Fragment {
     }
 
     private void initFragment() {
-        mNoteDAO = NoteDAOImpl.getInstance(mContext);
-        mItemDAO = ItemDAOImpl.getInstance(mContext);
-
-        mNoteDAO.setFirebaseInterface(fbNoteInterface);
-        mItemDAO.setFirebaseInterface(fbItemInterface);
-
         TypedArray colorArray = mContext.getResources().obtainTypedArray(R.array.color_list);
         int[] colorList = new int[9];
         for (int i = 0; i < colorList.length; i++) {
@@ -166,13 +173,16 @@ public class NoteListFragment extends Fragment {
             if (params != null) {
                 if (params[0] instanceof Integer && params[0] == 0) {
                     if (mNoteDAO != null && params[1] instanceof ArrayList) {
-                        mNoteDAO.addEntities((ArrayList<Note>) params[1]);
+                        Log.e(Common.APPTAG, "NoteListFragment - onResponse: fbNoteInterface getting notes done");
+                        mNoteDAO.addNotes((ArrayList<Note>) params[1], true);
                         loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, true);
                         if (loginDataSyncKey.get(Common.LOGIN_ITEM_SYNC)) {
-                            mainActivity.hideDialog();
-
                             loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, false);
                             loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, false);
+
+                            uploadLocalData(localNotes, localItems);
+                            mainActivity.hideDialog();
+                            getData(mCurrentMode);
                         }
                     }
                 }
@@ -186,14 +196,17 @@ public class NoteListFragment extends Fragment {
         public void onResponse(Object... params) {
             if (params != null) {
                 if (params[0] instanceof Integer && params[0] == Common.LOGIN_ITEM_SYNC) {
-                    if (mNoteDAO != null && params[1] instanceof ArrayList) {
-                        mNoteDAO.addEntities((ArrayList<Note>) params[1]);
+                    if (mItemDAO != null && params[1] instanceof ArrayList) {
+                        Log.e(Common.APPTAG, "NoteListFragment - onResponse: fbNoteInterface getting items done");
+                        mItemDAO.addItems((ArrayList<Item>) params[1], true);
                         loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, true);
                         if (loginDataSyncKey.get(Common.LOGIN_NOTE_SYNC)) {
-                            mainActivity.hideDialog();
-
                             loginDataSyncKey.put(Common.LOGIN_NOTE_SYNC, false);
                             loginDataSyncKey.put(Common.LOGIN_ITEM_SYNC, false);
+
+                            uploadLocalData(localNotes, localItems);
+                            mainActivity.hideDialog();
+                            getData(mCurrentMode);
                         }
                     }
                 }
@@ -256,9 +269,9 @@ public class NoteListFragment extends Fragment {
                     if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
                         if (mNoteDAO != null) {
                             if (mCurrentMode == Common.NOTE_STORAGE_MODE_ACTIVE || mCurrentMode == Common.NOTE_STORAGE_MODE_ARCHIVE) {
-                                mNoteDAO.moveNoteToTrash(remNote);
+                                mNoteDAO.changeStorageMode(remNote, Common.NOTE_STORAGE_MODE_TRASH);
                             } else {
-                                mNoteDAO.deleteEntity(remNote);
+                                mNoteDAO.deleteNote(remNote);
                             }
                         }
                     }
@@ -297,26 +310,26 @@ public class NoteListFragment extends Fragment {
 
         int count = mNoteListAdapter.getSelectedItemCount();
 
-        if (count == 0) {
-            actionmode.finish();
-        } else {
-            if (actionmode != null) {
-                actionmode.setTitle(String.valueOf(count));
-                actionmode.invalidate();
-            }
+//        if (count == 0) {
+//            actionmode.finish();
+//        } else {
+        if (actionmode != null) {
+            actionmode.setTitle(String.valueOf(count));
+            actionmode.invalidate();
         }
+//        }
     }
 
     public void onHideNoteFragment(int mode, int position, int noteId) {
         if (mode == Common.NOTE_ACTIVITY_NEW_ENTRY) {
-            Note newNote = mNoteDAO.getEntity(noteId);
+            Note newNote = mNoteDAO.getLocalNote(noteId);
             newNote.setFullContent(mItemDAO.getFullContent(noteId, Common.GET_ITEM_CONTENT_ACTION_LIST));
 
             mNoteList.add(0, newNote);
             mNoteListView.scrollToPosition(0);
             mNoteListAdapter.notifyItemInserted(0);
         } else if (mode == Common.NOTE_ACTIVITY_EDIT_ENTRY) {
-            Note editedNote = mNoteDAO.getEntity(noteId);
+            Note editedNote = mNoteDAO.getLocalNote(noteId);
             editedNote.setFullContent(mItemDAO.getFullContent(noteId, Common.GET_ITEM_CONTENT_ACTION_LIST));
 
             mNoteList.remove(position);
@@ -350,7 +363,7 @@ public class NoteListFragment extends Fragment {
         }
 
         mNoteList.clear();
-        mNoteList.addAll(mNoteDAO.getAllNotesByStorageMode(storageMode));
+        mNoteList.addAll(mNoteDAO.getNotesByStorageMode(storageMode));
 
         for (Note note : mNoteList) {
             note.setFullContent(mItemDAO.getFullContent(note.getId(), Common.GET_ITEM_CONTENT_ACTION_LIST));
@@ -395,7 +408,9 @@ public class NoteListFragment extends Fragment {
     public void initSampleData() {
         int size = titles.length;
         Random random = new Random();
-        ItemDAOImpl mItemDAO = ItemDAOImpl.getInstance(mContext);
+        if (mItemDAO == null) {
+            mItemDAO = new ItemDAOManager(mContext);
+        }
 
         for (int i = 0; i < size; i++) {
             //init note data
@@ -403,7 +418,7 @@ public class NoteListFragment extends Fragment {
             if (i == size - 1) {
                 note.setStorageMode(Common.NOTE_STORAGE_MODE_TRASH);
 
-                note.setDeletedTime(Common.getCurrentTimeMilisecs());
+                note.setDeletedTime(System.currentTimeMillis());
             } else if (i > 7 && i<size-1) {
                 note.setStorageMode(Common.NOTE_STORAGE_MODE_ARCHIVE);
             } else {
@@ -412,46 +427,60 @@ public class NoteListFragment extends Fragment {
             note.setColor(Math.abs(random.nextInt()) % 8);
             note.setTitle(titles[i]);
             note.setIsDone(false);
-
-            note.setLastModified(Common.getCurrentTimeMilisecs());
-            mNoteDAO.addEntity(note);
-            note.setFullContent(mItemDAO.getFullContent(note.getId(), Common.GET_ITEM_CONTENT_ACTION_LIST));
-            mNoteList.add(note);
+            long current = System.currentTimeMillis();
+            Log.e(Common.APPTAG, "initSampleData: " + current);
+            note.setLastModified(current);
+            mNoteDAO.addNote(note);
 
             //init note details data
             int detailSize = contents[i].length;
             for (int j = 0; j < detailSize; j++) {
-                Item item = new Item(note.getId(), contents[i][j], false, j);
-                mItemDAO.addEntity(item);
+                Item item = new Item(note.getFirebaseId(), note.getId(), contents[i][j], false, j);
+                mItemDAO.addItem(item);
             }
+
+            note.setFullContent(mItemDAO.getFullContent(note.getId(), Common.GET_ITEM_CONTENT_ACTION_LIST));
+            mNoteList.add(note);
         }
 
         mNoteListAdapter.notifyDataSetChanged();
     }
 
-    public void removeAllData() {
-//        if (mNoteDAO != null) {
-//            mNoteDAO.
-//        }
+    public void removeLocalData() {
+        if (mNoteDAO != null) {
+            mNoteDAO.deleteLocalData();
+        }
 
+        if (mItemDAO != null) {
+            mItemDAO.deleteLocalData();
+        }
+
+        getData(Common.NOTE_STORAGE_MODE_ACTIVE);
     }
 
     public void loginSynchronize() {
-        ArrayList<Note> allNotes = mNoteDAO.getAllLocalNotes();
-        ArrayList<Item> allItems = mItemDAO.getAllLocalItems();
 
-        uploadLocalData(allNotes, allItems);
+        localNotes = mNoteDAO.getLocalNotes();
+        localItems = mItemDAO.getLocalItems();
         downloadServerData();
     }
 
     private void uploadLocalData(ArrayList<Note> localNotes, ArrayList<Item> localItems) {
-        mNoteDAO.addEntities(localNotes);
-        mItemDAO.addEntities(localItems);
+        Log.e(Common.APPTAG, "NoteListFragment - uploadLocalData: ");
+        for (Note localNote : localNotes) {
+            String noteKey = mNoteDAO.uploadNote(localNote);
+            for (int i = localItems.size() - 1; i >= 0; i++) {
+                if (localItems.get(i).getNoteId() == localNote.getId()) {
+                    mItemDAO.uploadItem(localItems.get(i), noteKey);
+                    localItems.remove(i);
+                }
+            }
+        }
     }
 
     private void downloadServerData() {
-        mNoteDAO.getAllServerNotes();
-        mItemDAO.getAllServerItems();
+        mNoteDAO.getServerData();
+        mItemDAO.getServerData();
     }
 
     private final class ActionModeCallback implements ActionMode.Callback {
@@ -487,39 +516,57 @@ public class NoteListFragment extends Fragment {
             List<Integer> selectedItems = mNoteListAdapter.getSelectedItems();
 
             switch (item.getItemId()) {
-            case R.id.main_action_delete:
+            case R.id.active_delete:
+            case R.id.archive_delete:
+            case R.id.delete_delete:
                 if (mCurrentMode != Common.NOTE_STORAGE_MODE_TRASH) {
                     for (Integer index : selectedItems) {
-                        mNoteDAO.moveNoteToTrash(mNoteList.get(index));
+                        mNoteDAO.changeStorageMode(mNoteList.get(index), Common.NOTE_STORAGE_MODE_TRASH);
                     }
                 } else {
                     for (Integer index : selectedItems) {
-                        mNoteDAO.deleteEntity(mNoteList.get(index));
+                        mNoteDAO.deleteNote(mNoteList.get(index));
                     }
                 }
 
                 mNoteListAdapter.removeItems(selectedItems);
                 mode.finish();
                 return true;
-            case R.id.main_action_archive:
+            case R.id.active_archive:
+            case R.id.delete_archive:
                 if (mCurrentMode == Common.NOTE_STORAGE_MODE_ACTIVE) {
                     for (Integer index : selectedItems) {
-                        mNoteDAO.moveNoteToArchive(mNoteList.get(index));
+                        mNoteDAO.changeStorageMode(mNoteList.get(index), Common.NOTE_STORAGE_MODE_ARCHIVE);
                     }
                 }
 
                 mNoteListAdapter.removeItems(selectedItems);
                 mode.finish();
                 return true;
-            case R.id.main_action_unarchive:
-            case R.id.main_action_restore:
+            case R.id.archive_unarchive:
+            case R.id.delete_restore:
                 for (Integer index : selectedItems) {
-                    mNoteDAO.moveNoteToActive(mNoteList.get(index));
+                    mNoteDAO.changeStorageMode(mNoteList.get(index), Common.NOTE_STORAGE_MODE_ACTIVE);
                 }
 
                 mNoteListAdapter.removeItems(selectedItems);
                 mode.finish();
                 return true;
+            case R.id.action_select_all:
+                mNoteListAdapter.selectAll();
+                if (actionmode != null) {
+                    actionmode.setTitle(String.valueOf(mNoteListAdapter.getItemCount()));
+                    actionmode.invalidate();
+                }
+                return true;
+            case R.id.action_clear_selection:
+                mNoteListAdapter.clearSelection();
+                if (actionmode != null) {
+                    actionmode.setTitle(String.valueOf(0));
+                    actionmode.invalidate();
+                }
+                return false;
+
             default:
                 return false;
             }

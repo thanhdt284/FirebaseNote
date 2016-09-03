@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.firebase.note.R;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,12 +21,12 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.stevedao.note.control.Common;
-import com.stevedao.note.model.ColorPickerInterface;
 import com.stevedao.note.model.Item;
 import com.stevedao.note.model.Note;
 import com.stevedao.note.view.touchhelper.ItemTouchHelperAdapter;
@@ -71,13 +73,13 @@ public class NoteDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         LayoutInflater inflater = LayoutInflater.from(mContext);
         switch (viewType) {
         case TITLE_LAYOUT_TYPE:
-            View titleLayout = inflater.inflate(R.layout.note_activity_title_layout, parent, false);
+            View titleLayout = inflater.inflate(R.layout.note_detail_title_layout, parent, false);
             return new NoteTitleViewHolder(titleLayout);
         case ADD_LAYOUT_TYPE:
-            View addLayout = inflater.inflate(R.layout.note_activity_add_item_layout, parent, false);
+            View addLayout = inflater.inflate(R.layout.note_detail_add_item_layout, parent, false);
             return new NoteAddItemViewHolder(addLayout);
         default: //CONTENT_LAYOUT_TYPE
-            View contentLayout = inflater.inflate(R.layout.note_activity_content_item_layout, parent, false);
+            View contentLayout = inflater.inflate(R.layout.note_detail_content_item_layout, parent, false);
             return new NoteContentViewHolder(contentLayout);
         }
     }
@@ -99,9 +101,12 @@ public class NoteDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         case TITLE_LAYOUT_TYPE:
             NoteTitleViewHolder titleViewHolder = (NoteTitleViewHolder) holder;
             titleViewHolder.mTitleText.setText(mNote.getTitle());
-            TextDrawable drawable = TextDrawable.builder().buildRound("", mColorList[mNote.getColor()]);
-            titleViewHolder.mColorIndicator.setImageDrawable(drawable);
-            //                titleViewHolder.mColorIndicator.setColorFilter(mColorList[mNote.getColor()], PorterDuff.Mode.SRC_ATOP);
+            //            TextDrawable drawable = TextDrawable.builder().buildRound("", mColorList[mNote.getColor()]);
+            //            titleViewHolder.mColorIndicator.setImageDrawable(drawable);
+            titleViewHolder.mColorIndicator.setColorFilter(mColorList[mNote.getColor()], PorterDuff.Mode.SRC_ATOP);
+            titleViewHolder.mLastModified.setText(DateUtils.getRelativeDateTimeString(mContext, mNote.getLastModified(),
+                                                                                      DateUtils.DAY_IN_MILLIS,
+                                                                                      DateUtils.WEEK_IN_MILLIS, 0));
             break;
         case CONTENT_LAYOUT_TYPE:
             final NoteContentViewHolder contentViewHolder = (NoteContentViewHolder) holder;
@@ -173,12 +178,14 @@ public class NoteDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public class NoteTitleViewHolder extends RecyclerView.ViewHolder {
         private ImageView mColorIndicator;
         private EditText mTitleText;
+        private TextView mLastModified;
 
         public NoteTitleViewHolder(View itemView) {
             super(itemView);
 
             mColorIndicator = (ImageView) itemView.findViewById(R.id.color_indicator);
             mTitleText = (EditText) itemView.findViewById(R.id.edt_title);
+            mLastModified = (TextView) itemView.findViewById(R.id.note_detail_last_modified);
 
             mColorIndicator.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -298,12 +305,12 @@ public class NoteDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                         case KeyEvent.KEYCODE_NUMPAD_ENTER:
                             if (cursorIndex == curContent.length()) {
                                 if (pos == mItemData.size()) {
-                                    mItemData.add(new Item(Item.defaultValue, "", false, mItemData.size()));
+                                    mItemData.add(new Item("", Item.defaultValue, "", false, mItemData.size()));
                                     focusOnItem(mItemData.size(), 0);
                                     notifyItemInserted(mItemData.size());
                                     mNoteAdapterInterface.scrollToPosition(mItemData.size() + 1);
                                 } else {
-                                    mItemData.add(pos, new Item(Item.defaultValue, "", false, mItemData.size()));
+                                    mItemData.add(pos, new Item("", Item.defaultValue, "", false, mItemData.size()));
                                     focusOnItem(pos + 1, 0);
                                     notifyItemInserted(pos + 1);
                                     mNoteAdapterInterface.scrollToPosition(pos + 1);
@@ -312,7 +319,8 @@ public class NoteDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                                 String newItemContent =
                                         curContent.substring(edt.getSelectionEnd(), curContent.length());
                                 edt.setText(curContent.substring(0, cursorIndex));
-                                Item newItem = new Item(mNote.getId(), newItemContent, false, pos);
+                                Item newItem = new Item(mNote.getFirebaseId(), mNote.getId(), newItemContent, false,
+                                                        pos);
                                 mItemData.add(pos, newItem);
                                 focusOnItem(pos + 1, 0);
                                 notifyItemInserted(pos + 1);
@@ -388,17 +396,17 @@ public class NoteDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public class NoteAddItemViewHolder extends RecyclerView.ViewHolder {
 
-        public RelativeLayout newItemContainer;
+        public FrameLayout newItemContainer;
 
         public NoteAddItemViewHolder(View itemView) {
             super(itemView);
 
-            newItemContainer = (RelativeLayout) itemView.findViewById(R.id.add_sub_task_container);
+            newItemContainer = (FrameLayout) itemView.findViewById(R.id.add_item_container);
 
             newItemContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mItemData.add(new Item(Item.defaultValue, "", false, mItemData.size()));
+                    mItemData.add(new Item("", Item.defaultValue, "", false, mItemData.size()));
                     focusOnItem(mItemData.size(), 0);
                     notifyItemInserted(mItemData.size());
                     mNoteAdapterInterface.scrollToPosition(mItemData.size() + 1);

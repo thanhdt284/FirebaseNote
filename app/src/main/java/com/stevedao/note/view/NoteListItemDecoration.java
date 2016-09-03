@@ -13,6 +13,7 @@ import android.view.View;
 
 /**
  * Created by thanh.dao on 4/21/2016.
+ *
  */
 @SuppressWarnings("unused")
 public class NoteListItemDecoration extends RecyclerView.ItemDecoration {

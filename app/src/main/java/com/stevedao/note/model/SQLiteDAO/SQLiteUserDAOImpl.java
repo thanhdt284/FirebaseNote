@@ -1,4 +1,4 @@
-package com.stevedao.note.model;
+package com.stevedao.note.model.SQLiteDAO;
 
 import java.util.ArrayList;
 import android.content.ContentValues;
@@ -6,20 +6,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import com.stevedao.note.model.FirebaseDAO.FirebaseUserDAOImpl;
+import com.stevedao.note.control.Common;
+import com.stevedao.note.model.EntityDAO;
+import com.stevedao.note.model.User;
 
 /**
  * Created by sev_user on 8/17/2016.
  *
  */
-public class UserDAOImpl implements EntityDAO<User> {
-    private static final String TAG = "UserDAOImpl";
+public class SQLiteUserDAOImpl implements EntityDAO<User> {
     private final DatabaseOpenHelper dbHelper;
-    private FirebaseUserDAOImpl fbUserImpl;
 
-    public UserDAOImpl(Context mContext) {
+    public SQLiteUserDAOImpl(Context mContext) {
         dbHelper = DatabaseOpenHelper.getInstance(mContext);
-        fbUserImpl = new FirebaseUserDAOImpl();
     }
 
     @Override
@@ -33,12 +32,8 @@ public class UserDAOImpl implements EntityDAO<User> {
             values.put(DatabaseSpec.UserDB.FIELD_EMAIL, user.getEmail());
             values.put(DatabaseSpec.UserDB.FIELD_PHOTO_URL, user.getPhotoUrl());
 
-            if (db.insert(DatabaseSpec.UserDB.TABLE_NAME, null, values) >= 0) {
-                if (FirebaseUtil.getCurrentUser() != null) {
-                    fbUserImpl.addEntity(user);
-                }
-            } else {
-                Log.e(TAG, "addEntity: Add new user error");
+            if (db.insert(DatabaseSpec.UserDB.TABLE_NAME, null, values) < 0) {
+                Log.e(Common.APPTAG, "SQLiteUserDAOImpl - addEntity: Add new user error");
             }
 
             return 0;
@@ -122,6 +117,15 @@ public class UserDAOImpl implements EntityDAO<User> {
             String[] whereArgs = {String.valueOf(user.getId())};
 
             db.delete(DatabaseSpec.UserDB.TABLE_NAME, whereClause, whereArgs);
+        }
+    }
+
+    public void deleteUserData() {
+        synchronized (dbHelper) {
+            String queryString = "DELETE FROM " + DatabaseSpec.UserDB.TABLE_NAME;
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            db.rawQuery(queryString, null);
         }
     }
 }

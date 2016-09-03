@@ -27,14 +27,12 @@
 
         <ImageView
             android:id="@+id/note_list_indicator"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="16dp"
+            android:layout_width="53dp"
+            android:layout_height="@dimen/note_list_item_height"
             android:layout_marginRight="16dp"
-            android:layout_marginTop="16dp"
             android:contentDescription="@null"
             android:scaleType="fitXY"
-            android:src="@drawable/bookmark1"/>
+            android:src="@drawable/note_list_item_bookmark_blue"/>
 
         <LinearLayout
             android:id="@+id/note_list_content"
@@ -57,13 +55,14 @@
                 android:textStyle="bold"/>
 
             <TextView
-                android:id="@+id/note_list_item_content_text"
+                android:id="@+id/note_list_item_last_modified"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:fontFamily="sans-serif"
-                android:maxLines="2"
-                android:text="wlejrwejrewrioweoiroweiroiweroiweuriuewigjjggjjgjgjgjgjgjjgjgjgjgjgjgjjgjgjgjgjgjjgwqeqweqeqweqweqweqwejgjgjgj"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/color_content_text"
+                android:maxLines="1"
                 android:textSize="@dimen/note_list_item_content_text_size"/>
 
         </LinearLayout>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/color_indicator"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:src="@drawable/note_detail_bookmark_blue"
+        android:contentDescription="@null" />
+
+    <EditText
+        android:id="@+id/edt_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/note_list_item_horizontal_margin"
+        android:layout_marginRight="@dimen/note_list_item_horizontal_margin"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="85dp"
+        android:layout_marginLeft="85dp"
+        android:background="@android:color/transparent"
+        android:hint="@string/string_title"
+        android:textColor="@color/color_main_text"
+        android:textColorHint="@color/color_hint_text"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/note_detail_last_modified"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="85dp"
+        android:layout_marginLeft="85dp"
+        android:layout_below="@id/edt_title"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:layout_marginTop="6dp"
+        android:textColor="@color/color_content_text"
+        android:maxLines="1"
+        android:textSize="@dimen/note_list_item_content_text_size"/>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/note_detail_divider"
+        android:contentDescription="@null"/>
+</RelativeLayout>

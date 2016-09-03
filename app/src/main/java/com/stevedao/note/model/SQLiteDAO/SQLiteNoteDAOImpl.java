@@ -1,45 +1,22 @@
-package com.stevedao.note.model;
+package com.stevedao.note.model.SQLiteDAO;
 
+import java.util.ArrayList;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.stevedao.note.control.Common;
-import com.stevedao.note.model.FirebaseDAO.FirebaseNoteDAOImpl;
-import com.stevedao.note.view.ITaskResponse;
-
-import java.util.ArrayList;
+import com.stevedao.note.model.EntityDAO;
+import com.stevedao.note.model.Note;
 
 /**
  * Created by thanh.dao on 07/04/2016.
  *
  */
-public class NoteDAOImpl implements EntityDAO<Note> {
-    private static final String TAG = "NoteDAOImpl";
+public class SQLiteNoteDAOImpl implements EntityDAO<Note> {
     private final DatabaseOpenHelper dbHelper;
-    private FirebaseNoteDAOImpl fbNoteDAOImpl;
-
-    private static NoteDAOImpl noteDAO;
-
-    public static synchronized NoteDAOImpl getInstance(Context context) {
-        if (noteDAO == null) {
-            noteDAO = new NoteDAOImpl(context);
-        }
-
-        return noteDAO;
-    }
-
-    private NoteDAOImpl(Context context) {
-        dbHelper = DatabaseOpenHelper.getInstance(context);
-        fbNoteDAOImpl = new FirebaseNoteDAOImpl();
-    }
-
-    public void setFirebaseInterface(ITaskResponse iInterface) {
-        fbNoteDAOImpl.setInterface(iInterface);
-    }
 
     @Override
     public Object addEntity(Note note) {
@@ -47,6 +24,7 @@ public class NoteDAOImpl implements EntityDAO<Note> {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY, note.getFirebaseId());
             values.put(DatabaseSpec.NoteDB.FIELD_TITLE, note.getTitle());
             values.put(DatabaseSpec.NoteDB.FIELD_COLOR, note.getColor());
             values.put(DatabaseSpec.NoteDB.FIELD_IS_DONE, note.isDone() ? 1 : 0);
@@ -56,16 +34,17 @@ public class NoteDAOImpl implements EntityDAO<Note> {
 
             int insertedId = (int) db.insert(DatabaseSpec.NoteDB.TABLE_NAME, null, values);
             if (insertedId == -1) {
-                Log.e(TAG, "addEntity: Add note error: insertedId = -1");
+                Log.e(Common.APPTAG, "SQLiteNoteDAOImpl - addEntity: Add note error: insertedId = -1");
             } else {
                 note.setId(insertedId);
 
-                if (FirebaseUtil.getCurrentUser() != null) {
-                    fbNoteDAOImpl.addEntity(note);
-                }
             }
             return insertedId;
         }
+    }
+
+    public SQLiteNoteDAOImpl(Context context) {
+        dbHelper = DatabaseOpenHelper.getInstance(context);
     }
 
     @Override
@@ -79,10 +58,7 @@ public class NoteDAOImpl implements EntityDAO<Note> {
                 }
             }
 
-            if (FirebaseUtil.getCurrentUser() != null) {
-                fbNoteDAOImpl.addEntities(entities);
-            }
-
+            Log.e(Common.APPTAG, "SQLiteNoteDAOImpl - addEntities: added " + count + " notes");
             return count;
         }
     }
@@ -95,6 +71,7 @@ public class NoteDAOImpl implements EntityDAO<Note> {
 
             String[] projection = {
                     DatabaseSpec.NoteDB.FIELD_PKEY,
+                    DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY,
                     DatabaseSpec.NoteDB.FIELD_TITLE,
                     DatabaseSpec.NoteDB.FIELD_COLOR,
                     DatabaseSpec.NoteDB.FIELD_IS_DONE,
@@ -111,12 +88,13 @@ public class NoteDAOImpl implements EntityDAO<Note> {
 
             if (cursor != null && cursor.moveToFirst()) {
                 note = new Note(cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_PKEY)),
-                        cursor.getString(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_TITLE)),
-                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_COLOR)),
-                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_IS_DONE)) > 0,
-                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE)),
-                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED)),
-                        cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_DELETED_TIME)));
+                                cursor.getString(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY)),
+                                cursor.getString(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_TITLE)),
+                                cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_COLOR)),
+                                cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_IS_DONE)) > 0,
+                                cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE)),
+                                cursor.getLong(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED)),
+                                cursor.getLong(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_DELETED_TIME)));
 
                 cursor.close();
             }
@@ -132,6 +110,7 @@ public class NoteDAOImpl implements EntityDAO<Note> {
 
             String[] projection = {
                     DatabaseSpec.NoteDB.FIELD_PKEY,
+                    DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY,
                     DatabaseSpec.NoteDB.FIELD_TITLE,
                     DatabaseSpec.NoteDB.FIELD_COLOR,
                     DatabaseSpec.NoteDB.FIELD_IS_DONE,
@@ -162,13 +141,15 @@ public class NoteDAOImpl implements EntityDAO<Note> {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     int id = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_PKEY));
+                    String firebaseId = cursor.getString(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY));
                     String title = cursor.getString(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_TITLE));
                     int color = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_COLOR));
                     boolean isDone = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_IS_DONE)) > 0;
                     int storageMode = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE));
-                    long lastModified = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED));
-                    long deletedTime = cursor.getInt(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_DELETED_TIME));
-                    list.add(new Note(id, title, color, isDone, storageMode, lastModified, deletedTime));
+                    long lastModified = cursor.getLong(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED));
+                    long deletedTime = cursor.getLong(cursor.getColumnIndex(DatabaseSpec.NoteDB.FIELD_DELETED_TIME));
+
+                    list.add(new Note(id, firebaseId, title, color, isDone, storageMode, lastModified, deletedTime));
                 } while (cursor.moveToNext());
 
                 cursor.close();
@@ -184,6 +165,7 @@ public class NoteDAOImpl implements EntityDAO<Note> {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
             ContentValues values = new ContentValues();
+            values.put(DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY, note.getFirebaseId());
             values.put(DatabaseSpec.NoteDB.FIELD_TITLE, note.getTitle());
             values.put(DatabaseSpec.NoteDB.FIELD_COLOR, note.getColor());
             values.put(DatabaseSpec.NoteDB.FIELD_IS_DONE, note.isDone() ? 1 : 0);
@@ -191,16 +173,17 @@ public class NoteDAOImpl implements EntityDAO<Note> {
             values.put(DatabaseSpec.NoteDB.FIELD_LAST_MODIFIED, note.getLastModified());
             values.put(DatabaseSpec.NoteDB.FIELD_DELETED_TIME, note.getDeletedTime());
 
-            String selection = DatabaseSpec.NoteDB.FIELD_PKEY + " = ?";
-            String[] selectionArgs = {
-                    String.valueOf(note.getId())
-            };
+            String selection;
+            if (note.getFirebaseId().equals("")) {
+                selection = DatabaseSpec.NoteDB.FIELD_PKEY + " = ?";
+            } else {
+                selection = DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY + " = ?";
+            }
+
+            String[] selectionArgs =
+                    { String.valueOf(note.getFirebaseId().equals("") ? note.getId() : note.getFirebaseId()) };
 
             db.update(DatabaseSpec.NoteDB.TABLE_NAME, values, selection, selectionArgs);
-
-            if (FirebaseUtil.getCurrentUser() != null) {
-                fbNoteDAOImpl.updateEntity(note);
-            }
         }
     }
 
@@ -209,29 +192,17 @@ public class NoteDAOImpl implements EntityDAO<Note> {
         synchronized (dbHelper) {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            String selection = DatabaseSpec.NoteDB.FIELD_PKEY + " = ?";
-            String[] selectionArgs = {
-                    String.valueOf(note.getId())
-            };
+            String selection;
+            if (note.getFirebaseId().equals("")) {
+                selection = DatabaseSpec.NoteDB.FIELD_PKEY + " = ?";
+            } else {
+                selection = DatabaseSpec.NoteDB.FIELD_FIREBASE_KEY + " = ?";
+            }
+            String[] selectionArgs =
+                    { String.valueOf(note.getFirebaseId().equals("") ? note.getId() : note.getFirebaseId()) };
 
             db.delete(DatabaseSpec.NoteDB.TABLE_NAME, selection, selectionArgs);
-
-            if (FirebaseUtil.getCurrentUser() != null) {
-                fbNoteDAOImpl.deleteEntity(note);
-            }
         }
-    }
-
-    public ArrayList<Note> getAllLocalNotes() {
-        return getAllEntities(null, 0);
-    }
-
-    public ArrayList<Note> getAllServerNotes() {
-        return fbNoteDAOImpl.getAllEntities();
-    }
-
-    public ArrayList<Note> getAllNotesByStorageMode(int storageMode) {
-        return getAllEntities(DatabaseSpec.NoteDB.FIELD_STORAGE_MODE, storageMode);
     }
 
     @SuppressWarnings("unused")
@@ -244,39 +215,11 @@ public class NoteDAOImpl implements EntityDAO<Note> {
         return getAllEntities(DatabaseSpec.NoteDB.FIELD_IS_DONE, isDone ? 1 : 0);
     }
 
-    public void moveNoteToTrash(Note note) {
-        note.setStorageMode(Common.NOTE_STORAGE_MODE_TRASH);
-        updateEntity(note);
-    }
+    public void deleteAllNoteData() {
+        synchronized (dbHelper) {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-    public void moveNoteToArchive(Note note) {
-        note.setStorageMode(Common.NOTE_STORAGE_MODE_ARCHIVE);
-        updateEntity(note);
+            db.delete(DatabaseSpec.NoteDB.TABLE_NAME, null, null);
+        }
     }
-
-    public void moveNoteToActive(Note note) {
-        note.setStorageMode(Common.NOTE_STORAGE_MODE_ACTIVE);
-        updateEntity(note);
-    }
-
-//    public boolean isDataSynchronized() {
-//        boolean isSynced = true;
-//        ArrayList<Note> localNote = new ArrayList<>();
-//        ArrayList<Note> serverNote = new ArrayList<>();
-//
-//        localNote = getAllEntities();
-//        serverNote = fbNoteDAOImpl.getAllEntities();
-//
-//        int localSize = localNote.size();
-//        int serverSize = serverNote.size();
-//
-//        if (localSize != serverSize) {
-//            return false;
-//        } else {
-//            for (int i = 0; i < localSize; i++) {
-//
-//            }
-//        }
-//
-//    }
 }

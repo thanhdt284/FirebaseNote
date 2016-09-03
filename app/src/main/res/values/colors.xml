@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#FFFFFF</color>
+    <color name="colorPrimaryDark">#6B8C9D</color>
+    <color name="colorAccent">#21A0DA</color>
+
+    <color name="color_main_text">#6B8C9D</color>
+    <color name="color_content_text">#7C919C</color>
+    <color name="color_hint_text">#806B8C9D</color>
+    <color name="color_google_blue">#4285F4</color>
+    <color name="color_facebook_blue">#3B579D</color>
+    <color name="color_twitter_blue">#1DA1F2</color>
+
     <color name="color_teal">#009688</color>
     <color name="color_lime">#CDDC39</color>
     <color name="color_brown">#795548</color>
@@ -45,4 +53,6 @@
     <color name="color_bfbfbf_opacity_80">#CCBFBFBF</color>
     <color name="color_black_opacity_75">#1E000000</color>
     <color name="color_shadow_end_color">#40000000</color>
+
+    <color name="color_common_background">#EAEDF4</color>
 </resources>

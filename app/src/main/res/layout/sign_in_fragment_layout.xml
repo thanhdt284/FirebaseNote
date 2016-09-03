@@ -1,29 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/signin_title_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/signin_text_size"
-        android:textStyle="bold"
-        android:layout_marginTop="@dimen/signin_text_margin_top"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:cardview="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:background="@color/color_common_background">
+
+    <ImageView
+        android:id="@+id/logo_indicator"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
         android:layout_centerHorizontal="true"
-        android:text="@string/string_signin"/>
+        android:layout_marginTop="65dp"
+        android:background="@drawable/circle_background_image"
+        android:contentDescription="@string/app_name"
+        android:scaleType="centerInside"
+        android:src="@drawable/flat_logo" />
 
     <com.google.android.gms.common.SignInButton
-        android:id="@+id/google_signin_button"
+        android:id="@+id/google_sign_in_button"
+        android:layout_width="273dp"
+        android:layout_height="48dp"
+        android:layout_below="@+id/logo_indicator"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="65dp" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/facebook_button_container"
+        android:layout_width="265dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/google_sign_in_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="@color/color_facebook_blue"
+        cardview:cardElevation="4dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical">
+            <ImageView
+                android:id="@+id/iv_facebook_logo"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/facebook_logo_white"
+                android:contentDescription="@string/string_facebook" />
+            <TextView
+                android:layout_toRightOf="@+id/iv_facebook_logo"
+                android:layout_toEndOf="@id/iv_facebook_logo"
+                android:layout_marginLeft="45dp"
+                android:layout_marginStart="45dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/color_white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/string_sign_in_with_facebook"/>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/twitter_button_container"
+        android:layout_width="265dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/facebook_button_container"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="@color/color_twitter_blue"
+        cardview:cardElevation="4dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:gravity="center_vertical">
+            <ImageView
+                android:id="@+id/iv_twitter_logo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/twitter_logo_white"
+                android:contentDescription="@string/string_twitter" />
+            <TextView
+                android:layout_toRightOf="@+id/iv_twitter_logo"
+                android:layout_toEndOf="@id/iv_twitter_logo"
+                android:layout_marginLeft="45dp"
+                android:layout_marginStart="45dp"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/color_white"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="@string/string_sign_in_with_twitter"/>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+    <TextView
+        android:id="@+id/login_or_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_below="@id/twitter_button_container"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="@string/string_or"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
     <!--<com.facebook.login.widget.LoginButton-->
-        <!--android:id="@+id/facebook_signin_button"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@+id/google_signin_button"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:layout_marginTop="20dp"/>-->
+    <!--android:id="@+id/facebook_sign_in_button"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_below="@+id/google_sign_in_button"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_marginTop="20dp"/>-->
+
+    <android.support.v7.widget.CardView
+        android:layout_width="265dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/login_or_text_view"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        app:cardBackgroundColor="@color/colorAccent"
+        cardview:cardElevation="2dp">
+
+        <TextView
+            android:id="@+id/skip_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:text="@string/string_sign_in_later"
+            android:textColor="@color/color_white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </android.support.v7.widget.CardView>
 
 </RelativeLayout>

@@ -1,34 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/main_action_delete"
-        android:icon="@drawable/ic_delete_white"
-        android:orderInCategory="1"
-        android:title="@string/string_delete"
-        app:showAsAction="ifRoom"/>
     <group android:id="@+id/group_active">
         <item
-            android:id="@+id/main_action_archive"
-            android:icon="@drawable/ic_archive_white"
+            android:id="@+id/active_delete"
+            android:icon="@drawable/ic_trash"
+            android:orderInCategory="1"
+            android:title="@string/string_delete"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:id="@+id/active_archive"
+            android:icon="@drawable/ic_archive"
             android:orderInCategory="2"
             android:title="@string/string_archive"
             app:showAsAction="ifRoom"/>
     </group>
+
     <group android:id="@+id/group_archive">
         <item
-            android:id="@+id/main_action_unarchive"
-            android:icon="@drawable/ic_unarchive_white"
+            android:id="@+id/archive_delete"
+            android:icon="@drawable/ic_trash"
+            android:orderInCategory="1"
+            android:title="@string/string_delete"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:id="@+id/archive_unarchive"
+            android:icon="@drawable/ic_unarchive"
             android:orderInCategory="2"
             android:title="@string/string_unarchive"
             app:showAsAction="ifRoom"/>
     </group>
+
     <group android:id="@+id/group_trash">
         <item
-            android:id="@+id/main_action_restore"
-            android:icon="@drawable/ic_restore_white"
+            android:id="@+id/delete_delete"
+            android:icon="@drawable/ic_perma_delete"
+            android:orderInCategory="1"
+            android:title="@string/string_delete"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:id="@+id/delete_archive"
+            android:icon="@drawable/ic_archive"
             android:orderInCategory="2"
+            android:title="@string/string_archive"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:id="@+id/delete_restore"
+            android:icon="@drawable/ic_restore"
+            android:orderInCategory="6"
             android:title="@string/string_restore"
             app:showAsAction="ifRoom"/>
     </group>
+
+    <item
+        android:id="@+id/action_select_all"
+        android:title="@string/string_select_all"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_clear_selection"
+        android:title="@string/string_clear_selection"
+        android:orderInCategory="101"
+        app:showAsAction="never"/>
 </menu>

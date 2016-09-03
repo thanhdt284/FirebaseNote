@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
-import com.stevedao.note.model.ColorPickerInterface;
 
 /**
  * Created by thanh.dao on 12/04/2016.

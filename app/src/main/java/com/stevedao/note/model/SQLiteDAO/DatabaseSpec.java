@@ -1,4 +1,4 @@
-package com.stevedao.note.model;
+package com.stevedao.note.model.SQLiteDAO;
 
 import android.database.sqlite.SQLiteDatabase;
 
@@ -14,6 +14,7 @@ public class DatabaseSpec {
         public static final String TABLE_NAME = "note";
 
         public static final String FIELD_PKEY = "_id";
+        public static final String FIELD_FIREBASE_KEY = "firebase_key";
         public static final String FIELD_TITLE = "title";
         public static final String FIELD_COLOR = "color";
         public static final String FIELD_IS_DONE = "isDone";
@@ -23,6 +24,7 @@ public class DatabaseSpec {
 
         public static final String TABLE_CREATION_COMMAND = "CREATE TABLE " + TABLE_NAME + " ("
                 + FIELD_PKEY + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + FIELD_FIREBASE_KEY + " TEXT, "
                 + FIELD_TITLE + " TEXT NOT NULL, "
                 + FIELD_COLOR + " INTEGER NOT NULL, "
                 + FIELD_IS_DONE + " INTEGER NOT NULL, "
@@ -67,9 +69,11 @@ public class DatabaseSpec {
     }
 
     public static class ItemDB {
-        public static final String TABLE_NAME = "Item";
+        public static final String TABLE_NAME = "item";
 
         public static final String FIELD_PKEY = "_id";
+        public static final String FIELD_FIREBASE_KEY = "firebase_key";
+        public static final String FIELD_FIREBASE_NOTE_KEY = "firebase_note_key";
         public static final String FIELD_NOTE_ID = "noteId";
         public static final String FIELD_CONTENT = "content";
         public static final String FIELD_CHECKED = "checked";
@@ -77,6 +81,8 @@ public class DatabaseSpec {
 
         public static final String TABLE_CREATION_COMMAND = "CREATE TABLE " + TABLE_NAME + " ("
                 + FIELD_PKEY + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + FIELD_FIREBASE_KEY + " TEXT, "
+                + FIELD_FIREBASE_NOTE_KEY + " TEXT, "
                 + FIELD_NOTE_ID + " INTEGER NOT NULL, "
                 + FIELD_CONTENT + " TEXT NOT NULL, "
                 + FIELD_CHECKED + " INTEGER NOT NULL, "

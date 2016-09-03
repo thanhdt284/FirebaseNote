@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Note</string>
     <string name="string_task">Task</string>
-    <string name="string_add_sub_task">Add sub task</string>
-    <string name="string_color">color</string>
+    <string name="string_add_new_item">Add new item</string>
+    <string name="string_color">Color</string>
     <string name="string_archive">Archive</string>
     <string name="string_settings">Settings</string>
     <string name="string_help_and_feedback"><![CDATA[Help & Feedback]]></string>
@@ -19,8 +19,28 @@
     <string name="string_restore">restore</string>
     <string name="string_note_is_deleted">Note is deleted</string>
     <string name="string_note_is_permanently_deleted">note is permanently deleted</string>
-    <string name="string_signin">Sign In</string>
-    <string name="string_logging_in">Logging in ...</string>
+    <string name="string_sign_in">Sign In</string>
+    <string name="string_signing_in">Signing in …</string>
     <string name="string_sign_out">Sign out</string>
-    <string name="string_synchronizing_with_server">Synchronizing with server ...</string>
+    <string name="string_synchronizing_with_server">Synchronizing with server …</string>
+    <string name="string_no_internet_connection">No internet connection</string>
+    <string name="string_sign_out_no_internet_warning">Internet connection is unstable. Signing out could make
+        your unsynchronized data lost</string>
+    <string name="string_cancel">Cancel</string>
+    <string name="string_sign_in_later">Sign in later</string>
+    <string name="string_signing_out">Signing out …</string>
+    <string name="string_checking_network_connection">Checking network connection …</string>
+    <string name="string_or">OR</string>
+    <string name="string_facebook">facebook</string>
+    <string name="string_sign_in_with_facebook">Sign in with Facebook</string>
+    <string name="string_twitter">Twitter</string>
+    <string name="string_sign_in_with_twitter">Sign in with Twitter</string>
+    <string name="string_clear_all">Clear all</string>
+    <string name="string_select_all">Select all</string>
+    <string name="string_clear_selection">Clear selection</string>
+    <string name="string_back">Back</string>
+    <string name="string_more_options">More options</string>
+    <string name="string_send">Send</string>
+    <string name="string_reminder">Reminder</string>
+    <string name="string_title">Title</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.stevedao.note.model;
+package com.stevedao.note.model.FirebaseDAO;
 
 import android.support.annotation.Nullable;
 
@@ -6,6 +6,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.stevedao.note.model.SQLiteDAO.DatabaseSpec;
+import com.stevedao.note.model.User;
 
 /**
  * Created by thanh.dao on 8/4/2016.
@@ -18,8 +20,8 @@ public class FirebaseUtil {
     public static FirebaseDatabase getDatabaseInstance() {
         if (mDatabase == null) {
             mDatabase = FirebaseDatabase.getInstance();
-//            mDatabase.setPersistenceEnabled(true);
-//            enableSync();
+            mDatabase.setPersistenceEnabled(true);
+            enableSync();
         }
 
         return mDatabase;
@@ -82,11 +84,11 @@ public class FirebaseUtil {
     //// Keep sync data /////
     @SuppressWarnings("unused")
     private static void enableSync() {
-        DatabaseReference userRef = getUserRef();
-
-        if (userRef != null) {
-            userRef.keepSynced(true);
-        }
+//        DatabaseReference userRef = getUserRef();
+//
+//        if (userRef != null) {
+//            userRef.keepSynced(true);
+//        }
 
         DatabaseReference noteRef = getNoteRef();
 

@@ -20,12 +20,20 @@
         android:layout_height="match_parent"
         android:visibility="gone"/>
 
+    <FrameLayout
+        android:id="@+id/login_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
     <android.support.design.widget.NavigationView
         android:id="@+id/navigation_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        app:itemIconTint="@color/color_main_text"
+        app:itemTextColor="@color/color_main_text"
         app:headerLayout="@layout/nav_header_layout"
         app:menu="@menu/main_drawer_menu"/>
 </android.support.v4.widget.DrawerLayout>

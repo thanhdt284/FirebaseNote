@@ -2,6 +2,7 @@ package com.stevedao.note.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import com.stevedao.note.model.SQLiteDAO.DatabaseSpec;
 
 /**
  * Created by thanh.dao on 07/04/2016.
@@ -31,6 +32,18 @@ public class Note extends Entity {
 
     public Note(int id, String title, int color, boolean isDone, int storageMode, long lastModified, long deletedTime) {
         super(id);
+        this.title = title;
+        this.color = color;
+        this.isDone = isDone;
+        this.storageMode = storageMode;
+        this.lastModified = lastModified;
+        this.deletedTime = deletedTime;
+    }
+
+    public Note(int id,String firebaseKey, String title, int color, boolean isDone, int storageMode, long lastModified,
+                long
+            deletedTime) {
+        super(id, firebaseKey);
         this.title = title;
         this.color = color;
         this.isDone = isDone;

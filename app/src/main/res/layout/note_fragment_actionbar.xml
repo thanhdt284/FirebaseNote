@@ -1,18 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="?attr/actionBarSize"
-    android:background="@color/colorPrimary">
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary">
 
-    <ImageButton
-        android:id="@+id/note_actionbar_back"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_height="24dp"
-        android:layout_width="24dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/string_home"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_arrow_back_white" />
+    <FrameLayout
+        android:id="@+id/note_actionbar_back_container"
+        android:clickable="true"
+        android:layout_width="?attr/actionBarSize"
+        android:layout_height="?attr/actionBarSize">
+
+        <ImageButton
+            android:id="@+id/note_actionbar_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/string_back"
+            android:duplicateParentState="true"
+            android:scaleType="centerInside"
+            android:clickable="false"
+            android:src="@drawable/ic_arrow_back"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/note_actionbar_more_container"
+        android:layout_width="44dp"
+        android:layout_height="?attr/actionBarSize"
+        android:clickable="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
+
+        <ImageButton
+            android:id="@+id/note_actionbar_more"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/string_more_options"
+            android:duplicateParentState="true"
+            android:clickable="false"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_more_options"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/note_actionbar_send_container"
+        android:layout_width="46dp"
+        android:layout_height="?attr/actionBarSize"
+        android:clickable="true"
+        android:layout_toLeftOf="@+id/note_actionbar_more_container"
+        android:layout_toStartOf="@id/note_actionbar_more_container">
+
+        <ImageButton
+            android:id="@+id/note_actionbar_send"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/string_send"
+            android:duplicateParentState="true"
+            android:clickable="false"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_send"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/note_actionbar_reminder_container"
+        android:layout_width="46dp"
+        android:layout_height="?attr/actionBarSize"
+        android:clickable="true"
+        android:layout_toLeftOf="@+id/note_actionbar_send_container"
+        android:layout_toStartOf="@id/note_actionbar_send_container">
+
+        <ImageButton
+            android:id="@+id/note_actionbar_reminder"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/string_reminder"
+            android:duplicateParentState="true"
+            android:clickable="false"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_reminder"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/note_actionbar_color_container"
+        android:layout_width="46dp"
+        android:layout_height="?attr/actionBarSize"
+        android:clickable="true"
+        android:layout_toLeftOf="@+id/note_actionbar_reminder_container"
+        android:layout_toStartOf="@id/note_actionbar_reminder_container">
+
+        <ImageButton
+            android:id="@+id/note_actionbar_color_picker"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/string_color"
+            android:duplicateParentState="true"
+            android:clickable="false"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_color_picker"/>
+    </FrameLayout>
 </RelativeLayout>
