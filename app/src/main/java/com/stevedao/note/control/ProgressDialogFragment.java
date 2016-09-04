@@ -11,7 +11,7 @@ import android.support.v4.app.DialogFragment;
  *
  */
 public class ProgressDialogFragment extends DialogFragment {
-    private static final String KEY_TITLE = "title";
+    private static final String KEY_TITLE = "message";
     private ProgressDialog dialog;
 
     public static ProgressDialogFragment newInstance(String text) {

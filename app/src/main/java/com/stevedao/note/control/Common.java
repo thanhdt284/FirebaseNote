@@ -34,6 +34,10 @@ public class Common {
     public static final int GET_ITEM_CONTENT_ACTION_LIST = 0;
     public static final int GET_ITEM_CONTENT_ACTION_SEND = 1;
 
+    public static final int SORT_BY_TIME = 0;
+    public static final int SORT_BY_TITLE = 1;
+    public static final int SORT_BY_COLOR = 2;
+
     public static final int LOGIN_NOTE_SYNC = 0;
     public static final int LOGIN_ITEM_SYNC = 1;
     public static final String APPTAG = "FirebaseNote";

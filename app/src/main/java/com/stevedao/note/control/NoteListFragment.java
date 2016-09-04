@@ -1,6 +1,8 @@
 package com.stevedao.note.control;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -481,6 +483,25 @@ public class NoteListFragment extends Fragment {
     private void downloadServerData() {
         mNoteDAO.getServerData();
         mItemDAO.getServerData();
+    }
+
+    public void sortDataBy(final int sortBy) {
+        Collections.sort(mNoteList, new Comparator<Note>() {
+            @Override
+            public int compare(Note note1, Note note2) {
+                switch (sortBy) {
+                    case Common.SORT_BY_TIME:
+                        return (int) (note1.getLastModified() - note2.getLastModified());
+                    case Common.SORT_BY_TITLE:
+                        return note1.getTitle().compareTo(note2.getTitle());
+                    case Common.SORT_BY_COLOR:
+                        return note1.getColor() - note2.getColor();
+                }
+                return 0;
+            }
+        });
+
+        mNoteListAdapter.notifyDataSetChanged();
     }
 
     private final class ActionModeCallback implements ActionMode.Callback {

@@ -1,5 +1,6 @@
 package com.stevedao.note.control;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.RadioButton;
 import android.widget.Toast;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     private LoginFragment mLoginFragment;
     private Context mContext;
     private UserDAOManager mUserDAO;
-
+    private Dialog mSortDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,7 +163,42 @@ public class MainActivity extends AppCompatActivity
 
             mainFAB.setVisibility(View.GONE);
         }
+
+        initSortDialog();
     }
+
+    private void initSortDialog() {
+        mSortDialog = new Dialog(mContext);
+        mSortDialog.setCanceledOnTouchOutside(true);
+//        mSortDialog.getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.sort_dialog_title_layout);
+        mSortDialog.setContentView(R.layout.sort_dialog_layout);
+
+        RadioButton sortByTime = (RadioButton) mSortDialog.findViewById(R.id.rb_modified_time);
+        RadioButton sortByName = (RadioButton) mSortDialog.findViewById(R.id.rb_alphabet);
+        RadioButton sortByColor = (RadioButton) mSortDialog.findViewById(R.id.rb_color);
+        sortByTime.setOnClickListener(sortDialogClickListener);
+        sortByName.setOnClickListener(sortDialogClickListener);
+        sortByColor.setOnClickListener(sortDialogClickListener);
+    }
+
+    private View.OnClickListener sortDialogClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.rb_modified_time:
+                    mNoteListFragment.sortDataBy(Common.SORT_BY_TIME);
+                    break;
+                case R.id.rb_alphabet:
+                    mNoteListFragment.sortDataBy(Common.SORT_BY_TITLE);
+                    break;
+                case R.id.rb_color:
+                    mNoteListFragment.sortDataBy(Common.SORT_BY_COLOR);
+                    break;
+            }
+
+            mSortDialog.dismiss();
+        }
+    };
 
     @Override
     protected void onResume() {
@@ -314,21 +351,27 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.action_search:
-
-            break;
-        case R.id.action_sign_out:
-            showDialog(getResources().getString(R.string.string_checking_network_connection));
-            Common.hasActiveInternetConnection(mContext, networkResponse);
+            case R.id.action_sign_out:
+                showDialog(getResources().getString(R.string.string_checking_network_connection));
+                Common.hasActiveInternetConnection(mContext, networkResponse);
 
 //                handleSignOutAction();
 //            } else {
 //                showSignOutWarningDialog();
 //            }
-            break;
-        case R.id.action_sign_in:
-            showLoginFragment();
-            break;
+                break;
+            case R.id.action_sign_in:
+                showLoginFragment();
+                break;
+            case R.id.action_filter_by_color:
+                break;
+            case R.id.action_sort:
+                if (mSortDialog != null) {
+                    mSortDialog.show();
+                }
+                break;
+            case R.id.action_sync:
+                break;
         default:
             break;
         }

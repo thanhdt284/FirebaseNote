@@ -43,4 +43,10 @@
     <string name="string_send">Send</string>
     <string name="string_reminder">Reminder</string>
     <string name="string_title">Title</string>
+    <string name="string_filter_by_color">Filter by color</string>
+    <string name="string_sort">Sort</string>
+    <string name="string_sync">Sync</string>
+    <string name="string_by_modified_time">By modified time</string>
+    <string name="string_by_alphabet">By alphabet</string>
+    <string name="string_by_color">By color</string>
 </resources>

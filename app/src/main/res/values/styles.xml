@@ -25,6 +25,11 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">@color/colorPrimary</item>
         <item name="android:textColor">@color/color_main_text</item>
+        <item name="android:radioButtonStyle">@style/MyRadioButton</item>
+    </style>
+
+    <style name="MyRadioButton" parent="@android:style/Widget.CompoundButton.RadioButton">
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="ActionBarTheme" parent="Base.ThemeOverlay.AppCompat.Dark.ActionBar">

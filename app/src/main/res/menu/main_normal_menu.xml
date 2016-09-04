@@ -17,5 +17,20 @@
         android:orderInCategory="99"
         android:title="@string/string_sign_in"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_filter_by_color"
+        android:orderInCategory="101"
+        android:title="@string/string_filter_by_color"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_sort"
+        android:orderInCategory="102"
+        android:title="@string/string_sort"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_sync"
+        android:orderInCategory="103"
+        android:title="@string/string_sync"
+        app:showAsAction="never"/>
 
 </menu>

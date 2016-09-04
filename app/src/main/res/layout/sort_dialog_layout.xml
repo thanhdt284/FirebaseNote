@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="250dp"
+    android:layout_height="190dp"
+    android:padding="24dp"
+    app:theme="@style/MainActivityTheme"
+    android:gravity="center_vertical">
+    <TextView
+        android:textSize="24sp"
+        android:textColor="@color/color_main_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <RadioGroup
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatRadioButton
+            android:id="@+id/rb_modified_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:text="@string/string_by_modified_time"
+            android:textSize="18sp"
+            android:textColor="@color/color_main_text"
+            app:buttonTint="@color/color_main_text" />
+
+        <android.support.v7.widget.AppCompatRadioButton
+            android:id="@+id/rb_alphabet"
+            android:paddingLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/color_main_text"
+            app:buttonTint="@color/color_main_text"
+            android:text="@string/string_by_alphabet"/>
+
+        <android.support.v7.widget.AppCompatRadioButton
+            android:id="@+id/rb_color"
+            android:paddingLeft="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/color_main_text"
+            app:buttonTint="@color/color_main_text"
+            android:text="@string/string_by_color"/>
+    </RadioGroup>
+
+</LinearLayout>
